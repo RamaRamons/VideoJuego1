@@ -16,10 +16,10 @@ class Juego {
 
     this.puntos = [];
 
-    // Crear 20 peces
+    // Crear 20 peces juntos al centro
     this.peces = [];
     for (let i = 0; i < 20; i++) {
-      this.peces.push(new Pez(this, Math.random() * window.innerWidth, Math.random() * window.innerHeight, 1, 100));
+      this.peces.push(new Pez(this, window.innerWidth / 2, window.innerHeight / 2, 1, 100));
     }
 
     // Crear 10 enemigos
@@ -81,8 +81,8 @@ class Juego {
     graficoPunto.endFill();
     this.app.stage.addChild(graficoPunto);
 
-    // Almacenar el cuerpo físico, su representación gráfica y un temporizador
-    const comida = { cuerpo: punto, grafico: graficoPunto, tiempoVida: 10000 }; // 10 segundos de vida
+    // Almacenar el cuerpo físico y su representación gráfica
+    const comida = { cuerpo: punto, grafico: graficoPunto };
     this.puntos.push(comida);
 
     // Configurar la eliminación de la comida tras 10 segundos
@@ -92,7 +92,7 @@ class Juego {
         Matter.World.remove(this.world, punto);
         this.puntos.splice(this.puntos.indexOf(comida), 1);
       }
-    }, 5000); // Desaparece después de 10 segundos
+    }, 10000); // Desaparece después de 10 segundos
   }
 
   update() {
@@ -102,11 +102,12 @@ class Juego {
       punto.grafico.y = punto.cuerpo.position.y;
     }
 
-    // Actualizar peces y enemigos
+    // Actualizar peces
     for (let pez of this.peces) {
       pez.update(this.puntos, this.peces); // Actualizar peces con la lista de comida y otros peces
     }
 
+    // Actualizar enemigos
     for (let enemigo of this.enemigos) {
       enemigo.update(this.puntos); // Actualizar enemigos con la lista de comida
     }
