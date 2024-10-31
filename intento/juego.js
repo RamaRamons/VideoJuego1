@@ -12,105 +12,75 @@ class Juego {
 
     // Crear un runner para MatterJS
     this.runner = Matter.Runner.create();
-    Matter.Runner.run(this.runner, this.engine); // Ejecutar el motor con el runner
+    Matter.Runner.run(this.runner, this.engine);
 
-    this.puntos = [];
+    // Añadir fondo al escenario
+    this.ponerFondo();
 
-    // Crear 20 peces juntos al centro
     this.peces = [];
+    //this.enemigos = [];
+
+    // Crear 20 peces en el centro
     for (let i = 0; i < 20; i++) {
-      this.peces.push(new Pez(this, window.innerWidth / 2, window.innerHeight / 2, 1, 100));
+      this.peces.push(new Pez(this, window.innerWidth / 2, window.innerHeight / 2, 0.5, 100));
     }
 
     // Crear 10 enemigos
-    this.enemigos = [];
-    for (let i = 0; i < 10; i++) {
+    /*for (let i = 0; i < 10; i++) {
       this.enemigos.push(new Enemigo(this, Math.random() * window.innerWidth, Math.random() * window.innerHeight, 1));
-    }
+    }*/
 
-    // Variable para controlar la generación continua de puntos
-    this.generarPuntosContinuos = null;
+    // Inicializar la cámara
+    this.camera = new Camera();
 
     // Iniciar el loop de actualización de PixiJS
     this.app.ticker.add(() => this.update());
-
-    // Variable para almacenar la posición actual del mouse
-    this.mousePos = { x: 0, y: 0 };
-
-    // Event listeners para manejar la generación continua de comida
-    this.app.view.addEventListener('mousedown', () => this.iniciarGeneracionComida());
-    this.app.view.addEventListener('mouseup', () => this.detenerGeneracionComida());
-    this.app.view.addEventListener('mousemove', (event) => this.actualizarPosicionMouse(event));
   }
 
-  actualizarPosicionMouse(event) {
-    // Actualizar la posición actual del mouse
-    this.mousePos.x = event.clientX;
-    this.mousePos.y = event.clientY;
-  }
+  ponerFondo() {
+    // Cargar la textura de la imagen del fondo
+    const fondoTexture = PIXI.Texture.from("sprites/fondo/background.jpeg");
+    
+    // Crear un sprite con la textura del fondo
+    this.backgroundSprite = new PIXI.Sprite(fondoTexture);
 
-  iniciarGeneracionComida() {
-    // Inicia la generación continua de puntos solo si no está ya en marcha
-    if (!this.generarPuntosContinuos) {
-      this.generarPuntosContinuos = setInterval(() => this.generarPunto(this.mousePos), 100);
-    }
-  }
+    // Ajustar el tamaño del fondo
+    this.backgroundSprite.width = 3000; // Ajusta según sea necesario
+    this.backgroundSprite.height = 3000; // Ajusta según sea necesario
 
-  detenerGeneracionComida() {
-    // Detiene la generación de puntos cuando se suelta el mouse
-    clearInterval(this.generarPuntosContinuos);
-    this.generarPuntosContinuos = null;
-  }
-
-  generarPunto(posicionMouse) {
-    const x = posicionMouse.x;
-    const y = posicionMouse.y;
-
-    // Crear el punto rojo con velocidad de caída lenta
-    const punto = Matter.Bodies.circle(x, y, 5, {
-      restitution: 0.3, // Rebote moderado
-      frictionAir: 0.1, // Mayor fricción con el aire para simular agua
-      label: 'comida'
-    });
-    Matter.World.add(this.world, punto); // Añadir el cuerpo al mundo de MatterJS
-
-    // Crear la representación gráfica en PixiJS
-    const graficoPunto = new PIXI.Graphics();
-    graficoPunto.beginFill(0xFF0000); // Rojo
-    graficoPunto.drawCircle(0, 0, 5);
-    graficoPunto.endFill();
-    this.app.stage.addChild(graficoPunto);
-
-    // Almacenar el cuerpo físico y su representación gráfica
-    const comida = { cuerpo: punto, grafico: graficoPunto };
-    this.puntos.push(comida);
-
-    // Configurar la eliminación de la comida tras 10 segundos
-    setTimeout(() => {
-      if (this.puntos.includes(comida)) {
-        this.app.stage.removeChild(graficoPunto);
-        Matter.World.remove(this.world, punto);
-        this.puntos.splice(this.puntos.indexOf(comida), 1);
-      }
-    }, 10000); // Desaparece después de 10 segundos
+    // Posicionar el fondo en la capa más baja del stage
+    this.backgroundSprite.x = 0; // Asegúrate de que esté en la posición correcta
+    this.backgroundSprite.y = 0;
+    
+    // Agregar el fondo al escenario
+    this.app.stage.addChildAt(this.backgroundSprite, 0);
   }
 
   update() {
-    // Actualizar la posición de los puntitos rojos según el motor de física
-    for (const punto of this.puntos) {
-      punto.grafico.x = punto.cuerpo.position.x;
-      punto.grafico.y = punto.cuerpo.position.y;
-    }
-
-    // Actualizar peces
+    // Actualizar peces y enemigos
     for (let pez of this.peces) {
-      pez.update(this.puntos, this.peces); // Actualizar peces con la lista de comida y otros peces
+      pez.update(this.peces);
     }
 
-    // Actualizar enemigos
-    for (let enemigo of this.enemigos) {
-      enemigo.update(this.puntos); // Actualizar enemigos con la lista de comida
+    /*for (let enemigo of this.enemigos) {
+      enemigo.update(this.peces);
+    }*/
+
+    // Lógica de actualización de los peces y enemigos
+    this.peces.forEach(pez => pez.update(this.peces));
+    //this.enemigos.forEach(enemigo => enemigo.update(this.peces));
+ 
+    // Si hay al menos un pez, la cámara seguirá al primer pez
+    if (this.peces.length > 0) {
+        this.camera.follow(this.peces[0]); // Cambia el índice según cuál pez seguir
     }
+ 
+    // Renderizar los objetos
+    //renderizarObjetos(this.peces, this.enemigos, this.app, this.backgroundSprite);
+  }
+
+  actualizarPosicionMouse(event) {
+    this.mousePos = { x: event.clientX, y: event.clientY };
   }
 }
 

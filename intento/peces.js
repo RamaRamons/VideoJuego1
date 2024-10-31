@@ -1,156 +1,171 @@
 class Pez {
-  constructor(juego, x, y, velocidadMax, radioVision) {
-      this.juego = juego;
-      this.x = x;
-      this.y = y;
-      this.vel = { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 };
-      this.aceleracion = { x: 0, y: 0 };
-      this.velocidadMax = velocidadMax;
-      this.radioVision = radioVision;
-      this.size = 7;
+    constructor(juego, x, y, velocidadMax, radioVision) {
+        this.juego = juego;
+        this.x = this.juego.app.screen.width / 2;  // Posicionar en el centro
+        this.y = this.juego.app.screen.height / 2;
+        this.vel = { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 };
+        this.aceleracion = { x: 0, y: 0 };
+        this.velocidadMax = velocidadMax;
+        this.radioVision = radioVision;
+        this.size = 7;
+        this.estado = 'vivo';
+        this.direccion = 'derecha';
 
-      this.sprite = new PIXI.Graphics();
-      this.sprite.beginFill(0x00ffcc);
-      this.sprite.drawCircle(0, 0, this.size);
-      this.sprite.endFill();
-      this.juego.app.stage.addChild(this.sprite);
-      
-      this.tiempoAlejamiento = Math.random() * 200 + 100; // Tiempo en frames para alejarse
-      this.tiempoRestante = this.tiempoAlejamiento; // Inicializar contador de alejamiento
-  }
+        // Cargar las texturas de movimiento y muerte
+        this.texturasMovimiento = {
+            derecha: PIXI.Texture.from("sprites/pez/movimiento/pezDer.png"),
+            izquierda: PIXI.Texture.from("sprites/pez/movimiento/pezIzq.png"),
+            abajoIzq: PIXI.Texture.from("sprites/pez/movimiento/pezIzqAb.png"),
+            arribaIzq: PIXI.Texture.from("sprites/pez/movimiento/pezIzqAr.png"),
+            abajoDer: PIXI.Texture.from("sprites/pez/movimiento/pezDerAb.png"),
+            arribaDer: PIXI.Texture.from("sprites/pez/movimiento/pezDerAr.png"),
+        };
 
-  aplicarFuerza(fuerza) {
-      this.aceleracion.x += fuerza.x;
-      this.aceleracion.y += fuerza.y;
-  }
+        this.texturasMuerte1 = {
+            derecha: PIXI.Texture.from("sprites/pez/muertes/pezMuerte1Der.png"),
+            izquierda: PIXI.Texture.from("sprites/pez/muertes/pezMuerte1Izq.png"),
+            abajoIzq: PIXI.Texture.from("sprites/pez/muertes/pezMuerte1IzqAb.png"),
+            arribaIzq: PIXI.Texture.from("sprites/pez/muertes/pezMuerte1IzqAr.png"),
+            abajoDer: PIXI.Texture.from("sprites/pez/muertes/pezMuerte1DerAb.png"),
+            arribaDer: PIXI.Texture.from("sprites/pez/muertes/pezMuerte1DerAr.png"),
+        };
 
-  cohesion(peces) {
-      let centroMasa = { x: 0, y: 0 };
-      let count = 0;
-      for (let otroPez of peces) {
-          if (otroPez !== this && this.distancia(otroPez) < this.radioVision) {
-              centroMasa.x += otroPez.x;
-              centroMasa.y += otroPez.y;
-              count++;
-          }
-      }
-      if (count > 0) {
-          centroMasa.x /= count;
-          centroMasa.y /= count;
-          let direccion = { x: centroMasa.x - this.x, y: centroMasa.y - this.y };
-          return this.normalize(direccion);
-      }
-      return { x: 0, y: 0 };
-  }
+        this.container = new PIXI.Container();
+        this.sprite = new PIXI.Sprite(this.texturasMovimiento.derecha);
+        this.sprite.anchor.set(0.5);
+        this.container.addChild(this.sprite);
+        this.container.scale.set(0.05); // Ajusta el tamaño si es necesario
+        this.juego.app.stage.addChild(this.container);
 
-  separacion(peces) {
-      let repulsion = { x: 0, y: 0 };
-      let count = 0;
-      for (let otroPez of peces) {
-          let distancia = this.distancia(otroPez);
-          if (otroPez !== this && distancia < this.size * 2) {
-              repulsion.x += this.x - otroPez.x;
-              repulsion.y += this.y - otroPez.y;
-              count++;
-          }
-      }
-      if (count > 0) {
-          repulsion.x /= count;
-          repulsion.y /= count;
-      }
-      return this.normalize(repulsion);
-  }
+        // Crear el cuerpo en MatterJS
+        this.cuerpo = Matter.Bodies.circle(this.x, this.y, this.size, { isStatic: false });
+        Matter.World.add(this.juego.world, this.cuerpo);
+    }
 
-  alineacion(peces) {
-      let direccionPromedio = { x: 0, y: 0 };
-      let count = 0;
-      for (let otroPez of peces) {
-          if (otroPez !== this && this.distancia(otroPez) < this.radioVision) {
-              direccionPromedio.x += otroPez.vel.x;
-              direccionPromedio.y += otroPez.vel.y;
-              count++;
-          }
-      }
-      if (count > 0) {
-          direccionPromedio.x /= count;
-          direccionPromedio.y /= count;
-          return this.normalize(direccionPromedio);
-      }
-      return { x: 0, y: 0 };
-  }
+    cambiarSprite(direccion, estado) {
+        if (estado === 'vivo') {
+            this.sprite.texture = this.texturasMovimiento[direccion];
+        } else if (estado === 'muerto') {
+            this.sprite.texture = this.texturasMuerte1[direccion];
+        }
+    }
 
-  alejarseTemporalmente() {
-      if (this.tiempoRestante <= 0) {
-          this.tiempoRestante = this.tiempoAlejamiento; // Reiniciar el contador de alejamiento
-          return { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 }; // Movimiento aleatorio
-      }
-      this.tiempoRestante--;
-      return { x: 0, y: 0 };
-  }
+    aplicarFuerza(fuerza) {
+        this.aceleracion.x += fuerza.x;
+        this.aceleracion.y += fuerza.y;
+    }
 
-  perseguirComida(puntos) {
-      for (let i = 0; i < puntos.length; i++) {
-          let punto = puntos[i];
-          let distanciaComida = Math.hypot(this.x - punto.cuerpo.position.x, this.y - punto.cuerpo.position.y);
-          if (distanciaComida < this.radioVision) {
-              let direccionComida = { x: punto.cuerpo.position.x - this.x, y: punto.cuerpo.position.y - this.y };
+    update(peces) {
+        // Fuerzas de cohesión, separación y alineación
+        let cohesion = this.cohesion(peces);
+        let separacion = this.separacion(peces);
+        let alineacion = this.alineacion(peces);
 
-              if (distanciaComida < this.size + punto.size) {
-                  this.juego.app.stage.removeChild(punto.grafico);
-                  puntos.splice(i, 1);
-              }
-              return this.normalize(direccionComida);
-          }
-      }
-      return { x: 0, y: 0 };
-  }
+        // Ajustar fuerzas para mayor separación
+        cohesion.x *= 0.03; cohesion.y *= 0.03;
+        separacion.x *= 0.5; separacion.y *= 0.5; // Incrementa la separación
+        alineacion.x *= 0.1; alineacion.y *= 0.1;
 
-  update(puntos, peces) {
-      let cohesion = this.cohesion(peces);
-      let separacion = this.separacion(peces);
-      let alineacion = this.alineacion(peces);
-      let persecucionComida = this.perseguirComida(puntos);
-      let alejarse = this.alejarseTemporalmente();
+        // Aplicar fuerzas
+        this.aplicarFuerza(cohesion);
+        this.aplicarFuerza(separacion);
+        this.aplicarFuerza(alineacion);
 
-      cohesion.x *= 0.05; cohesion.y *= 0.05;
-      separacion.x *= 0.3; separacion.y *= 0.3;
-      alineacion.x *= 0.1; alineacion.y *= 0.1;
-      alejarse.x *= 0.4; alejarse.y *= 0.4;
+        // Actualizar velocidad y posición
+        this.vel.x += this.aceleracion.x;
+        this.vel.y += this.aceleracion.y;
+        this.vel = this.normalize(this.vel);
+        this.vel.x *= this.velocidadMax;
+        this.vel.y *= this.velocidadMax;
 
-      this.aplicarFuerza(cohesion);
-      this.aplicarFuerza(separacion);
-      this.aplicarFuerza(alineacion);
-      this.aplicarFuerza(alejarse);
+        this.x += this.vel.x;
+        this.y += this.vel.y;
+        this.aceleracion = { x: 0, y: 0 };
 
-      persecucionComida.x *= 0.5;
-      persecucionComida.y *= 0.5;
-      this.aplicarFuerza(persecucionComida);
+        // Limitar la posición a los bordes de la pantalla
+        if (this.x < 0) this.x = this.juego.app.screen.width;
+        if (this.x > this.juego.app.screen.width) this.x = 0;
+        if (this.y < 0) this.y = this.juego.app.screen.height;
+        if (this.y > this.juego.app.screen.height) this.y = 0;
 
-      this.vel.x += this.aceleracion.x;
-      this.vel.y += this.aceleracion.y;
+        // Determinar la dirección para el sprite
+        if (this.vel.x > 0) {
+            this.direccion = this.vel.y > 0 ? 'abajoDer' : 'arribaDer';
+        } else {
+            this.direccion = this.vel.y > 0 ? 'abajoIzq' : 'arribaIzq';
+        }
 
-      let velocidad = this.normalize(this.vel);
-      this.vel.x = velocidad.x * this.velocidadMax;
-      this.vel.y = velocidad.y * this.velocidadMax;
+        this.cambiarSprite(this.direccion, this.estado);
 
-      this.x += this.vel.x;
-      this.y += this.vel.y;
+        // Actualizar la posición del contenedor
+        this.container.x = this.x;
+        this.container.y = this.y;
+    }
 
-      this.aceleracion = { x: 0, y: 0 };
+    cohesion(peces) {
+        let centroMasa = { x: 0, y: 0 };
+        let count = 0;
+        for (let otroPez of peces) {
+            if (otroPez !== this && this.distancia(otroPez) < this.radioVision) {
+                centroMasa.x += otroPez.x;
+                centroMasa.y += otroPez.y;
+                count++;
+            }
+        }
+        if (count > 0) {
+            centroMasa.x /= count;
+            centroMasa.y /= count;
+            let direccion = { x: centroMasa.x - this.x, y: centroMasa.y - this.y };
+            return this.normalize(direccion);
+        }
+        return { x: 0, y: 0 };
+    }
 
-      this.sprite.x = this.x;
-      this.sprite.y = this.y;
-  }
+    separacion(peces) {
+        let repulsion = { x: 0, y: 0 };
+        let count = 0;
+        for (let otroPez of peces) {
+            let distancia = this.distancia(otroPez);
+            if (otroPez !== this && distancia < this.size * 4) {  // Aumentar el umbral de distancia
+                repulsion.x += this.x - otroPez.x;
+                repulsion.y += this.y - otroPez.y;
+                count++;
+            }
+        }
+        if (count > 0) {
+            repulsion.x /= count;
+            repulsion.y /= count;
+        }
+        return this.normalize(repulsion);
+    }
 
-  distancia(otroPez) {
-      return Math.hypot(this.x - otroPez.x, this.y - otroPez.y);
-  }
+    alineacion(peces) {
+        let direccionPromedio = { x: 0, y: 0 };
+        let count = 0;
+        for (let otroPez of peces) {
+            if (otroPez !== this && this.distancia(otroPez) < this.radioVision) {
+                direccionPromedio.x += otroPez.vel.x;
+                direccionPromedio.y += otroPez.vel.y;
+                count++;
+            }
+        }
+        if (count > 0) {
+            direccionPromedio.x /= count;
+            direccionPromedio.y /= count;
+            return this.normalize(direccionPromedio);
+        }
+        return { x: 0, y: 0 };
+    }
 
-  normalize(vector) {
-      let magnitude = Math.hypot(vector.x, vector.y);
-      if (magnitude > 0) {
-          return { x: vector.x / magnitude, y: vector.y / magnitude };
-      }
-      return { x: 0, y: 0 };
-  }
+    distancia(otroPez) {
+        return Math.hypot(this.x - otroPez.x, this.y - otroPez.y);
+    }
+
+    normalize(vector) {
+        let magnitude = Math.hypot(vector.x, vector.y);
+        if (magnitude > 0) {
+            return { x: vector.x / magnitude, y: vector.y / magnitude };
+        }
+        return { x: 0, y: 0 };
+    }
 }
