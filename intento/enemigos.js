@@ -3,90 +3,149 @@ class Enemigo {
         this.juego = juego;
         this.x = x;
         this.y = y;
-        this.vel = { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 }; // Velocidad inicial aleatoria
+        this.vel = { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 };
         this.velocidadMax = velocidadMax || 2;
-        this.radioVisionPursuit = 50; // Radio de visión para perseguir peces
-        this.radioVisionKill = 20; // Radio de visión para matar peces
-        this.size = 15; // Tamaño del enemigo
+        this.radioVisionPursuit = 10;
+        this.radioVisionKill = 5;
+        this.size = 15;
 
-        this.sprite = new PIXI.Graphics();
-        this.sprite.beginFill(0xff3333);
-        this.sprite.drawCircle(0, 0, this.size);
-        this.sprite.endFill();
-        this.juego.app.stage.addChild(this.sprite);
-
-        this.tiempoPersecucion = 1; // Temporizador para persecución
-    }
-
-    // Detectar si hay peces dentro del rango de visión
-    detectarPeces(peces) {
-        for (let pez of peces) {
-            let distanciaPez = Math.hypot(this.x - pez.x, this.y - pez.y);
-            if (distanciaPez < this.radioVisionPursuit) {
-                return pez; // Retornar el pez más cercano para perseguir
-            }
-        }
-        return null; // No hay peces en rango
+        // Inicialización del sprite, se define en las clases derivadas
+        this.sprite = null;
+        this.tiempoPersecucion = 1;
+        
     }
 
     update(peces) {
-        // Lógica de detección de peces
         let pezCercano = this.detectarPeces(peces);
-    
+
         if (pezCercano) {
-            // Si hay un pez cercano, empieza a perseguirlo por 5 segundos
-            this.tiempoPersecucion = 1; // Resetear el tiempo de persecución
-            let direccionPez = { x: pezCercano.x - this.x, y: pezCercano.y - this.y };
-            let velocidad = this.normalize(direccionPez);
-            this.x += velocidad.x * this.velocidadMax;
-            this.y += velocidad.y * this.velocidadMax;
-    
-            // Lógica de matar peces
-            if (Math.hypot(this.x - pezCercano.x, this.y - pezCercano.y) < this.radioVisionKill) {
-                this.matarPez(peces, pezCercano);
-            }
+            this.tiempoPersecucion = 1; // Reiniciar tiempo de persecución
+            this.perseguirPez(pezCercano, peces);
         } else {
-            // Si no hay pez cercano, moverse aleatoriamente
             this.movimientoAleatorio();
         }
-    
-        // Actualizar la posición del sprite
+
+        // Actualizar posición del sprite
         this.sprite.x = this.x;
         this.sprite.y = this.y;
     }
-    
-    matarPez(peces, pezCercano) {
-        // Asegúrate de que el pezCercano existe y tiene un cuerpo
-        if (pezCercano && pezCercano.cuerpo) {
-            // Eliminar el pez del arreglo y de la representación gráfica
-            peces.splice(peces.indexOf(pezCercano), 1); // Eliminar del arreglo de peces
-            this.juego.app.stage.removeChild(pezCercano.sprite); // Eliminar de la escena
-            Matter.World.remove(this.juego.world, pezCercano.cuerpo); // Eliminar del mundo de MatterJS
+
+    detectarPeces(peces) {
+        let pezCercano = null;
+        let distanciaMinima = this.radioVisionPursuit;
+
+        // Buscar el pez más cercano dentro del radio de visión
+        for (let pez of peces) {
+            const distancia = Math.hypot(pez.x - this.x, pez.y - this.y);
+            if (distancia < distanciaMinima) {
+                distanciaMinima = distancia;
+                pezCercano = pez;
+            }
+        }
+
+        return pezCercano;
+    }
+
+    perseguirPez(pezCercano, peces) {
+        let direccionPez = { x: pezCercano.x - this.x, y: pezCercano.y - this.y };
+        let velocidad = this.normalize(direccionPez);
+        this.x += velocidad.x * this.velocidadMax;
+        this.y += velocidad.y * this.velocidadMax;
+
+        // Cambiar textura del sprite según la dirección de movimiento
+        if (velocidad.x > 0) {
+            this.sprite.texture = this.sprites.derecha; // Mover a la derecha
+        } else if (velocidad.x < 0) {
+            this.sprite.texture = this.sprites.izquierda; // Mover a la izquierda
+        }
+
+        // Verificar si está en rango para matar al pez
+        if (Math.hypot(this.x - pezCercano.x, this.y - pezCercano.y) < this.radioVisionKill) {
+            this.matarPez(peces, pezCercano);
         }
     }
 
-    // Método para movimiento aleatorio
     movimientoAleatorio() {
-        this.vel.x += (Math.random() - 0.5) * 0.2; // Pequeñas variaciones
-        this.vel.y += (Math.random() - 0.5) * 0.2; // Pequeñas variaciones
+        this.vel.x += (Math.random() - 0.5) * 0.2;
+        this.vel.y += (Math.random() - 0.5) * 0.2;
 
-        // Limitar la velocidad
+        // Normalizar la velocidad
         const magnitud = Math.hypot(this.vel.x, this.vel.y);
         if (magnitud > this.velocidadMax) {
             this.vel.x = (this.vel.x / magnitud) * this.velocidadMax;
             this.vel.y = (this.vel.y / magnitud) * this.velocidadMax;
         }
 
-        // Actualizar posición con el movimiento aleatorio
         this.x += this.vel.x;
         this.y += this.vel.y;
+
+        // Cambiar textura del sprite según la dirección de movimiento
+        if (this.vel.x > 0) {
+            this.sprite.texture = this.sprites.derecha; // Mover a la derecha
+        } else if (this.vel.x < 0) {
+            this.sprite.texture = this.sprites.izquierda; // Mover a la izquierda
+        }
     }
 
     normalize(vector) {
         let magnitude = Math.hypot(vector.x, vector.y);
-        if (magnitude > 0) {
-            return { x: vector.x / magnitude, y: vector.y / magnitude };
+        return magnitude > 0 ? { x: vector.x / magnitude, y: vector.y / magnitude } : { x: 0, y: 0 };
+    }
+
+    // Método para matar al pez
+    matarPez(peces, pezCercano) {
+        const index = peces.indexOf(pezCercano);
+        if (index > -1) {
+            peces.splice(index, 1); // Eliminar el pez del array
         }
-        return { x: 0, y: 0 };
+    }
+    
+}
+
+// Clase Tiburon1 que hereda de Enemigo
+class Tiburon1 extends Enemigo {
+    constructor(juego, x, y, velocidadMax) {
+        super(juego, x, y, velocidadMax);
+        this.cargarSprites();
+    }
+
+    cargarSprites() {
+        // Cargar texturas para Tiburon1
+        this.sprites = {
+            derecha: PIXI.Texture.from('sprites/tiburones/tib1Der.png'),
+            izquierda: PIXI.Texture.from('sprites/tiburones/tib1Izq.png'),
+            muerte: PIXI.Texture.from('sprites/tiburones/muerte.png') // Textura de muerte
+        };
+
+        // Crear el sprite inicial usando la textura de la derecha
+        this.sprite = new PIXI.Sprite(this.sprites.derecha);
+        this.sprite.anchor.set(0.5);
+        // Establecer un tamaño específico
+        this.sprite.scale.set(0.5);
+        this.juego.app.stage.addChild(this.sprite);
+    }
+}
+
+// Clase Tiburon2 que hereda de Enemigo
+class Tiburon2 extends Enemigo {
+    constructor(juego, x, y, velocidadMax) {
+        super(juego, x, y, velocidadMax);
+        this.cargarSprites();
+    }
+
+    cargarSprites() {
+        // Cargar texturas para Tiburon2
+        this.sprites = {
+            derecha: PIXI.Texture.from('sprites/tiburones/tib2Der.png'),
+            izquierda: PIXI.Texture.from('sprites/tiburones/tib2Izq.png'),
+            muerte: PIXI.Texture.from('sprites/tiburones/muerte.png') // Textura de muerte
+        };
+
+        // Crear el sprite inicial usando la textura de la derecha
+        this.sprite = new PIXI.Sprite(this.sprites.derecha);
+        this.sprite.anchor.set(0.5);
+        // Establecer un tamaño específico
+        this.sprite.scale.set(0.6);
+        this.juego.app.stage.addChild(this.sprite);
     }
 }

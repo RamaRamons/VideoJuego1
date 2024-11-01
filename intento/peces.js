@@ -1,8 +1,8 @@
 class Pez {
-    constructor(juego, x, y, velocidadMax, radioVision) {
+    constructor(juego, x, y, velocidadMax, radioVision, tiempoEsperaMuerte) {
         this.juego = juego;
-        this.x = this.juego.app.screen.width / 2;  // Posicionar en el centro
-        this.y = this.juego.app.screen.height / 2;
+        this.x = x;  // Posición inicial
+        this.y = y;
         this.vel = { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 };
         this.aceleracion = { x: 0, y: 0 };
         this.velocidadMax = velocidadMax;
@@ -10,24 +10,23 @@ class Pez {
         this.size = 7;
         this.estado = 'vivo';
         this.direccion = 'derecha';
+        this.tiempoEsperaMuerte = tiempoEsperaMuerte; // Tiempo a esperar al morir
+        this.tiempoMuerto = 0; // Contador para manejar la muerte
 
         // Cargar las texturas de movimiento y muerte
         this.texturasMovimiento = {
-            derecha: PIXI.Texture.from("sprites/pez/movimiento/pezDer.png"),
-            izquierda: PIXI.Texture.from("sprites/pez/movimiento/pezIzq.png"),
-            abajoIzq: PIXI.Texture.from("sprites/pez/movimiento/pezIzqAb.png"),
-            arribaIzq: PIXI.Texture.from("sprites/pez/movimiento/pezIzqAr.png"),
-            abajoDer: PIXI.Texture.from("sprites/pez/movimiento/pezDerAb.png"),
-            arribaDer: PIXI.Texture.from("sprites/pez/movimiento/pezDerAr.png"),
+            derecha: PIXI.Texture.from("sprites/pez/pezDer.png"),
+            izquierda: PIXI.Texture.from("sprites/pez/pezIzq.png"),
         };
 
         this.texturasMuerte1 = {
-            derecha: PIXI.Texture.from("sprites/pez/muertes/pezMuerte1Der.png"),
-            izquierda: PIXI.Texture.from("sprites/pez/muertes/pezMuerte1Izq.png"),
-            abajoIzq: PIXI.Texture.from("sprites/pez/muertes/pezMuerte1IzqAb.png"),
-            arribaIzq: PIXI.Texture.from("sprites/pez/muertes/pezMuerte1IzqAr.png"),
-            abajoDer: PIXI.Texture.from("sprites/pez/muertes/pezMuerte1DerAb.png"),
-            arribaDer: PIXI.Texture.from("sprites/pez/muertes/pezMuerte1DerAr.png"),
+            derecha: PIXI.Texture.from("sprites/pez/pezMuerte1Der.png"),
+            izquierda: PIXI.Texture.from("sprites/pez/pezMuerte1Izq.png"),
+        };
+
+        this.texturasMuerte2 = {
+            derecha: PIXI.Texture.from("sprites/pez/pezMuerte2Der.png"),
+            izquierda: PIXI.Texture.from("sprites/pez/pezMuerte2Izq.png"),
         };
 
         this.container = new PIXI.Container();
@@ -36,10 +35,6 @@ class Pez {
         this.container.addChild(this.sprite);
         this.container.scale.set(0.05); // Ajusta el tamaño si es necesario
         this.juego.app.stage.addChild(this.container);
-
-        // Crear el cuerpo en MatterJS
-        this.cuerpo = Matter.Bodies.circle(this.x, this.y, this.size, { isStatic: false });
-        Matter.World.add(this.juego.world, this.cuerpo);
     }
 
     cambiarSprite(direccion, estado) {
@@ -47,6 +42,8 @@ class Pez {
             this.sprite.texture = this.texturasMovimiento[direccion];
         } else if (estado === 'muerto') {
             this.sprite.texture = this.texturasMuerte1[direccion];
+        } else if (estado === 'caida') {
+            this.sprite.texture = this.texturasMuerte2[direccion];
         }
     }
 
@@ -56,50 +53,69 @@ class Pez {
     }
 
     update(peces) {
-        // Fuerzas de cohesión, separación y alineación
-        let cohesion = this.cohesion(peces);
-        let separacion = this.separacion(peces);
-        let alineacion = this.alineacion(peces);
+        if (this.estado === 'vivo') {
+            // Forzar la dirección de movimiento cuando esté cerca de los bordes
+            if (this.x < 50) {
+                this.vel.x = Math.abs(this.vel.x); // Mover a la derecha
+            } else if (this.x > this.juego.app.screen.width - 50) {
+                this.vel.x = -Math.abs(this.vel.x); // Mover a la izquierda
+            }
 
-        // Ajustar fuerzas para mayor separación
-        cohesion.x *= 0.03; cohesion.y *= 0.03;
-        separacion.x *= 0.5; separacion.y *= 0.5; // Incrementa la separación
-        alineacion.x *= 0.1; alineacion.y *= 0.1;
+            if (this.y < 50) {
+                this.vel.y = Math.abs(this.vel.y); // Mover hacia abajo
+            } else if (this.y > this.juego.app.screen.height - 50) {
+                this.vel.y = -Math.abs(this.vel.y); // Mover hacia arriba
+            }
 
-        // Aplicar fuerzas
-        this.aplicarFuerza(cohesion);
-        this.aplicarFuerza(separacion);
-        this.aplicarFuerza(alineacion);
+            // Fuerzas de cohesión, separación y alineación
+            let cohesion = this.cohesion(peces);
+            let separacion = this.separacion(peces);
+            let alineacion = this.alineacion(peces);
 
-        // Actualizar velocidad y posición
-        this.vel.x += this.aceleracion.x;
-        this.vel.y += this.aceleracion.y;
-        this.vel = this.normalize(this.vel);
-        this.vel.x *= this.velocidadMax;
-        this.vel.y *= this.velocidadMax;
+            // Ajustar fuerzas
+            cohesion.x *= 0.03; cohesion.y *= 0.03;
+            separacion.x *= 0.5; separacion.y *= 0.5; 
+            alineacion.x *= 0.1; alineacion.y *= 0.1;
 
-        this.x += this.vel.x;
-        this.y += this.vel.y;
-        this.aceleracion = { x: 0, y: 0 };
+            // Aplicar fuerzas
+            this.aplicarFuerza(cohesion);
+            this.aplicarFuerza(separacion);
+            this.aplicarFuerza(alineacion);
 
-        // Limitar la posición a los bordes de la pantalla
-        if (this.x < 0) this.x = this.juego.app.screen.width;
-        if (this.x > this.juego.app.screen.width) this.x = 0;
-        if (this.y < 0) this.y = this.juego.app.screen.height;
-        if (this.y > this.juego.app.screen.height) this.y = 0;
+            // Actualizar velocidad y posición
+            this.vel.x += this.aceleracion.x;
+            this.vel.y += this.aceleracion.y;
+            this.vel = this.normalize(this.vel);
+            this.vel.x *= this.velocidadMax;
+            this.vel.y *= this.velocidadMax;
 
-        // Determinar la dirección para el sprite
-        if (this.vel.x > 0) {
-            this.direccion = this.vel.y > 0 ? 'abajoDer' : 'arribaDer';
-        } else {
-            this.direccion = this.vel.y > 0 ? 'abajoIzq' : 'arribaIzq';
+            this.x += this.vel.x;
+            this.y += this.vel.y;
+            this.aceleracion = { x: 0, y: 0 };
+
+            // Determinar la dirección para el sprite
+            this.direccion = this.vel.x > 0 ? 'derecha' : 'izquierda';
+            this.cambiarSprite(this.direccion, this.estado);
+
+            // Actualizar la posición del contenedor
+            this.container.x = this.x;
+            this.container.y = this.y;
+        } else if (this.estado === 'muerto') {
+            this.tiempoMuerto += this.juego.app.ticker.deltaMS; // Tiempo que ha pasado
+            if (this.tiempoMuerto >= this.tiempoEsperaMuerte) {
+                this.estado = 'caida';
+                this.cambiarSprite(this.direccion, this.estado);
+                this.vel.y = 0.1; // Velocidad de caída
+            }
+        } else if (this.estado === 'caida') {
+            this.vel.y += 0.05; // Aumentar la gravedad
+            this.x += this.vel.x;
+            this.y += this.vel.y;
+
+            if (this.tiempoMuerto >= 5000) { // Tiempo de caída de 5 segundos
+                this.juego.eliminarPez(this); // Eliminar el pez
+            }
         }
-
-        this.cambiarSprite(this.direccion, this.estado);
-
-        // Actualizar la posición del contenedor
-        this.container.x = this.x;
-        this.container.y = this.y;
     }
 
     cohesion(peces) {
@@ -126,7 +142,7 @@ class Pez {
         let count = 0;
         for (let otroPez of peces) {
             let distancia = this.distancia(otroPez);
-            if (otroPez !== this && distancia < this.size * 4) {  // Aumentar el umbral de distancia
+            if (otroPez !== this && distancia < this.size * 4) { 
                 repulsion.x += this.x - otroPez.x;
                 repulsion.y += this.y - otroPez.y;
                 count++;
@@ -157,14 +173,14 @@ class Pez {
         return { x: 0, y: 0 };
     }
 
-    distancia(otroPez) {
-        return Math.hypot(this.x - otroPez.x, this.y - otroPez.y);
+    distancia(otro) {
+        return Math.sqrt((this.x - otro.x) ** 2 + (this.y - otro.y) ** 2);
     }
 
     normalize(vector) {
-        let magnitude = Math.hypot(vector.x, vector.y);
-        if (magnitude > 0) {
-            return { x: vector.x / magnitude, y: vector.y / magnitude };
+        let mag = Math.sqrt(vector.x ** 2 + vector.y ** 2);
+        if (mag > 0) {
+            return { x: vector.x / mag, y: vector.y / mag };
         }
         return { x: 0, y: 0 };
     }
