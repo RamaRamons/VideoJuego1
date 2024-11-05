@@ -22,7 +22,7 @@ class Juego {
 
       // Crear 20 peces en el centro
       for (let i = 0; i < 20; i++) {
-          this.peces.push(new Pez(this, window.innerWidth / 2, window.innerHeight / 2, 0.5, 100, 5));
+          this.peces.push(new Pez(this, window.innerWidth / 2, window.innerHeight / 2, 1, 100, 1));
       }
 
       // Crear 5 Tiburon1
@@ -44,10 +44,7 @@ class Juego {
       this.app.ticker.add(() => this.update());
   }
   calcularCentro() {
-    if (this.peces.length === 0) {
-        // Si no hay peces, devolver la última posición conocida
-        return this.ultimaPosicion;
-    }
+    
 
     // Calcular el centro de los peces
     let totalX = 0;
@@ -61,6 +58,13 @@ class Juego {
     // Calcular el promedio de las posiciones
     const centroX = totalX / this.peces.length;
     const centroY = totalY / this.peces.length;
+
+    
+    if (this.peces.length === 0) {
+        // Si no hay peces, devolver la última posición conocida
+        return this.ultimaPosicion;
+    }
+    this.ultimaPosicion = { x: centroX, y: centroY };
 
     return { x: centroX, y: centroY };
   }
