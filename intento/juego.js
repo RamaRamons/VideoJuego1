@@ -38,10 +38,32 @@ class Juego {
       // Inicializar la cámara
       this.camera = new Camera();
 
+      this.ultimaPosicion = { x: this.app.renderer.width / 2, y: this.app.renderer.height / 2 }; // Posición inicial predeterminada
+
       // Iniciar el loop de actualización de PixiJS
       this.app.ticker.add(() => this.update());
   }
+  calcularCentro() {
+    if (this.peces.length === 0) {
+        // Si no hay peces, devolver la última posición conocida
+        return this.ultimaPosicion;
+    }
 
+    // Calcular el centro de los peces
+    let totalX = 0;
+    let totalY = 0;
+
+    this.peces.forEach((pez) => {
+        totalX += pez.x;
+        totalY += pez.y;
+    });
+
+    // Calcular el promedio de las posiciones
+    const centroX = totalX / this.peces.length;
+    const centroY = totalY / this.peces.length;
+
+    return { x: centroX, y: centroY };
+  }
   ponerFondo() {
       // Cargar la textura de la imagen del fondo
       const fondoTexture = PIXI.Texture.from("sprites/background.jpeg");
@@ -60,7 +82,7 @@ class Juego {
       // Agregar el fondo al escenario
       this.app.stage.addChildAt(this.backgroundSprite, 0);
   }
-
+  
   update() {
       // Actualizar peces y enemigos
       for (let pez of this.peces) {
@@ -73,9 +95,19 @@ class Juego {
       }
 
       // Si hay al menos un pez, la cámara seguirá al primer pez
-      if (this.peces.length > 0) {
-          this.camera.follow(this.peces[0]); // Cambia el índice según cuál pez seguir
-      }
+      const centro = this.calcularCentro();
+      
+
+      // Ajustar la posición del contenedor para que el centro esté en el centro de la pantalla
+      this.app.stage.pivot.x = centro.x;
+      this.app.stage.pivot.y = centro.y;
+
+      // Asegurarse de que el centro esté en el medio de la pantalla
+      this.app.stage.position.x = this.app.renderer.width / 2;
+      this.app.stage.position.y = this.app.renderer.height / 2;
+      
+      this.backgroundSprite.x = centro.x - this.app.renderer.width;
+      this.backgroundSprite.y = centro.y - this.app.renderer.height;
   }
 }
 
