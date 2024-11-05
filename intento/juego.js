@@ -64,6 +64,7 @@ class Juego {
 
     return { x: centroX, y: centroY };
   }
+
   ponerFondo() {
       // Cargar la textura de la imagen del fondo
       const fondoTexture = PIXI.Texture.from("sprites/background.jpeg");
@@ -82,7 +83,7 @@ class Juego {
       // Agregar el fondo al escenario
       this.app.stage.addChildAt(this.backgroundSprite, 0);
   }
-  
+
   update() {
       // Actualizar peces y enemigos
       for (let pez of this.peces) {
@@ -113,3 +114,4 @@ class Juego {
 
 // Inicializar el juego
 const juego = new Juego();
+
