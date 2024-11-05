@@ -114,4 +114,3 @@ class Juego {
 
 // Inicializar el juego
 const juego = new Juego();
-
