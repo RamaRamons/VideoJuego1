@@ -1,0 +1,119 @@
+{
+  "frames": {
+    "3.png": {
+      "frame": {
+        "x": 1,
+        "y": 1,
+        "w": 1069,
+        "h": 591
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 86,
+        "y": 425,
+        "w": 1069,
+        "h": 591
+      },
+      "sourceSize": {
+        "w": 1280,
+        "h": 1280
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "4.png": {
+      "frame": {
+        "x": 1,
+        "y": 594,
+        "w": 1061,
+        "h": 561
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 82,
+        "y": 423,
+        "w": 1061,
+        "h": 561
+      },
+      "sourceSize": {
+        "w": 1280,
+        "h": 1280
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "1.png": {
+      "frame": {
+        "x": 1,
+        "y": 1157,
+        "w": 1058,
+        "h": 629
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 94,
+        "y": 423,
+        "w": 1058,
+        "h": 629
+      },
+      "sourceSize": {
+        "w": 1280,
+        "h": 1280
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "2.png": {
+      "frame": {
+        "x": 1,
+        "y": 1788,
+        "w": 1044,
+        "h": 659
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 102,
+        "y": 425,
+        "w": 1044,
+        "h": 659
+      },
+      "sourceSize": {
+        "w": 1280,
+        "h": 1280
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "animations": {
+    "BuzoIzquierdaArriba": [
+      "1.png",
+      "2.png",
+      "3.png",
+      "4.png"
+    ]
+  },
+  "meta": {
+    "app": "http://free-tex-packer.com",
+    "version": "0.6.7",
+    "image": "BuzoIzquierdaArriba.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 1071,
+      "h": 2448
+    },
+    "scale": 1
+  }
+}

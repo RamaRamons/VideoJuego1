@@ -1,0 +1,119 @@
+{
+  "frames": {
+    "izquierdaAb3.png": {
+      "frame": {
+        "x": 1,
+        "y": 1,
+        "w": 1072,
+        "h": 428
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 141,
+        "y": 481,
+        "w": 1072,
+        "h": 428
+      },
+      "sourceSize": {
+        "w": 1280,
+        "h": 1280
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "izquierdaAb4.png": {
+      "frame": {
+        "x": 1,
+        "y": 431,
+        "w": 1065,
+        "h": 439
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 147,
+        "y": 486,
+        "w": 1065,
+        "h": 439
+      },
+      "sourceSize": {
+        "w": 1280,
+        "h": 1280
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "izquierdaAb1.png": {
+      "frame": {
+        "x": 1,
+        "y": 872,
+        "w": 1062,
+        "h": 480
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 166,
+        "y": 458,
+        "w": 1062,
+        "h": 480
+      },
+      "sourceSize": {
+        "w": 1280,
+        "h": 1280
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "izquierdaAb2.png": {
+      "frame": {
+        "x": 1,
+        "y": 1354,
+        "w": 1050,
+        "h": 445
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 159,
+        "y": 474,
+        "w": 1050,
+        "h": 445
+      },
+      "sourceSize": {
+        "w": 1280,
+        "h": 1280
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "animations": {
+    "BuzoIzquierdaAbajo": [
+      "izquierdaAb1.png",
+      "izquierdaAb2.png",
+      "izquierdaAb3.png",
+      "izquierdaAb4.png"
+    ]
+  },
+  "meta": {
+    "app": "http://free-tex-packer.com",
+    "version": "0.6.7",
+    "image": "BuzoIzquierdaAbajo.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 1074,
+      "h": 1800
+    },
+    "scale": 1
+  }
+}
