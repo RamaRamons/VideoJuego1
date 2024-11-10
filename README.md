@@ -1,6 +1,7 @@
 # Fish Protection
 
-### Un juego de supervivencia en el fondo del mar. Tu objetivo como buzo será protejer un cardumen de peses de sus enemigos naturales; los tiburones.
+#### Un juego de supervivencia en el fondo del mar. Tu objetivo como buzo será protejer un cardumen de peses de sus enemigos naturales; los tiburones.
+
 
 
 ## Personajes
