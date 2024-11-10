@@ -5,6 +5,7 @@
 
 
 ## Personajes
+![](./intento/sprites/buzo/der.png)
 ![](./intento/sprites/pez/pezDer.png)
 ![](./intento/sprites/tiburones/derPer2.png)
 ![](./intento/sprites/tiburones/tib1Der.png)
