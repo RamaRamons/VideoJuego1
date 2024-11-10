@@ -10,6 +10,6 @@
 ![](./sprites/tiburones/tib1Der.png)
 
 
-##Equipo de desarrollo
+## Equipo de desarrollo
 Agustina Esjaita
 Ramiro Castro
