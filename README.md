@@ -11,5 +11,5 @@
 
 
 ## Equipo de desarrollo
-Agustina Esjaita
-Ramiro Castro
+- Agustina Esjaita
+- Ramiro Castro
