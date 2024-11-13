@@ -22,6 +22,7 @@ class Jugador {
         this.sprite.scale.set(0.3);  // Escala el jugador al 30% de su tamaño original
         this.sprite.addChild(this.animaciones[this.direccionActual]);
         this.animaciones[this.direccionActual].play();
+        this.sprite.pivot.set(650  , 650)
 
         // Configurar la velocidad de movimiento
         this.velocidad = 3; // Cambia este valor para ajustar la velocidad
@@ -88,8 +89,9 @@ class Jugador {
 
     persigueMouse() {
         // Obtener las coordenadas del mouse (usando los eventos de PIXI)
-        const mouseX = this.app.renderer.plugins.interaction.mouse.global.x;
-        const mouseY = this.app.renderer.plugins.interaction.mouse.global.y;
+        const mouseX = this.app.renderer.plugins.interaction.mouse.global.x + this.app.stage.pivot.x - this.app.stage.x;
+        const mouseY = this.app.renderer.plugins.interaction.mouse.global.y + this.app.stage.pivot.y - this.app.stage.y;
+
 
         // Calcular la dirección hacia el mouse
         const dx = mouseX - this.sprite.x;
@@ -97,12 +99,13 @@ class Jugador {
         const distancia = Math.sqrt(dx * dx + dy * dy);
 
         // Si el mouse está cerca del jugador, dejar de moverlo
-        if (distancia < 1) return;
+        if (distancia < 200) return;
 
         // Calcular el ángulo hacia el mouse
         const angle = Math.atan2(dy, dx);
 
         // Mover al jugador gradualmente hacia el mouse
+
         this.sprite.x += Math.cos(angle) * this.velocidad;
         this.sprite.y += Math.sin(angle) * this.velocidad;
 

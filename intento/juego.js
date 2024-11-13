@@ -3,6 +3,7 @@ class Juego {
         // Crear el escenario de PixiJS
         this.app = new PIXI.Application({ width: window.innerWidth, height: window.innerHeight });
         document.body.appendChild(this.app.view);
+        globalThis.__PIXI_APP__ = this.app;
 
         // Configurar MatterJS
         this.engine = Matter.Engine.create();
