@@ -116,12 +116,19 @@ class Juego {
     }
     
     ponerFondo() {
-        const fondoTexture = PIXI.Texture.from("sprites/background.jpeg");
+        const fondoTexture = PIXI.Texture.from("sprites/fondo/backgroundtest.jpeg");
         this.backgroundSprite = new PIXI.Sprite(fondoTexture);
-        this.backgroundSprite.width = 3000;
-        this.backgroundSprite.height = 3000;
-        this.backgroundSprite.x = 0;
-        this.backgroundSprite.y = 0;
+
+        this.backgroundSprite.x = 250 * 18;
+        this.backgroundSprite.y = 250 * 18;
+
+        this.backgroundSprite.width = 250 * 36;
+        this.backgroundSprite.height = 250 * 36;
+
+        this.backgroundSprite.pivot.x = 800;
+        this.backgroundSprite.pivot.y = 800;
+
+        
         this.app.stage.addChildAt(this.backgroundSprite, 0);
     }
 
@@ -169,18 +176,17 @@ class Juego {
 
     update() {
         const centro = this.calcularCentro();
-
-        this.app.stage.pivot.x = centro.x;
-        this.app.stage.pivot.y = centro.y;
+        
+        //esto hace que el stage este centrado en el medio de la pantalla
         this.app.stage.position.x = this.app.renderer.width / 2;
         this.app.stage.position.y = this.app.renderer.height / 2;
 
-        this.backgroundSprite.x = centro.x - this.app.renderer.width / 2;
-        this.backgroundSprite.y = centro.y - this.app.renderer.height / 2;
-
-        // Asegúrate de que el overlay también siga al fondo
-        this.waterOverlay.x = this.backgroundSprite.x;
-        this.waterOverlay.y = this.backgroundSprite.y;
+        this.app.stage.pivot.x = centro.x
+        this.app.stage.pivot.y = centro.y        
+        
+        //esto hace que el filtro de agua este en el mismo lugar que el centro de los peces
+        this.waterOverlay.x = centro.x - this.app.renderer.width / 2;
+        this.waterOverlay.y = centro.y - this.app.renderer.height / 2;
 
         // Mantener los efectos visuales como el filtro y overlay
         this.waterOverlay.tilePosition.x += 0.5;
@@ -202,9 +208,7 @@ class Juego {
 
         for (let enemigo of this.enemigos) {
             enemigo.update(this.peces, this.enemigos);}
-        
-        this.backgroundSprite.x = centro.x - this.app.renderer.width;
-        this.backgroundSprite.y = centro.y - this.app.renderer.height;
+    
 
         if (this.jugador) {
             this.jugador.apuntarHaciaMouse(this.app.renderer.plugins.interaction.mouse.global.x, this.app.renderer.plugins.interaction.mouse.global.y);
