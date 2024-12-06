@@ -1,5 +1,6 @@
-class Pez {
-    constructor(juego, x, y, velocidadMax, radioVision, tiempoEsperaMuerte) {
+class Pez extends Entidad {
+    constructor(juego, x, y, velocidadMax, radioVision) {
+        super(juego, x, y, velocidadMax);
         this.juego = juego;
         this.x = x;  // Posición inicial
         this.y = y;
@@ -10,7 +11,7 @@ class Pez {
         this.size = 7;
         this.estado = 'vivo';
         this.direccion = 'derecha';
-        this.tiempoEsperaMuerte = tiempoEsperaMuerte; // Tiempo a esperar al morir
+        this.tiempoEsperaMuerte = 5 // Tiempo a esperar al morir
         this.tiempoMuerto = 0; // Contador para manejar la muerte
 
         // Cargar las texturas de movimiento y muerte
@@ -116,6 +117,7 @@ class Pez {
                 this.juego.eliminarPez(this); // Eliminar el pez
             }
         }
+        super.update()
     }
 
     cohesion(peces) {

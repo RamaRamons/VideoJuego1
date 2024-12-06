@@ -2,15 +2,29 @@ class Grid {
     constructor(cellSize, juego) {
         this.cellSize = cellSize;
         this.juego = juego;
-        this.columns = Math.ceil(88); // Ajustar según el tamaño de tu mapa
-        this.rows = Math.ceil(88);
+        
+        this.columns = Math.ceil(90); // Ajustar según el tamaño de tu mapa
+        this.rows = Math.ceil(90);
 
         // Crear una matriz 2D para las celdas
         this.cells = [];
         for (let row = 0; row < this.rows; row++) {
             const rowArray = [];
             for (let col = 0; col < this.columns; col++) {
-                rowArray.push({ objetos: [] }); // Celda básica con un arreglo para objetos
+                rowArray.push({
+                    objetos: [],
+                    agregarObjeto: function (objeto) {
+                        if (!this.objetos.includes(objeto)) {
+                            this.objetos.push(objeto);
+                        }
+                    },
+                    removeObjeto: function (objeto) {
+                        const index = this.objetos.indexOf(objeto);
+                        if (index !== -1) {
+                            this.objetos.splice(index, 1);
+                        }
+                    }
+                });
             }
             this.cells.push(rowArray);
         }
@@ -19,7 +33,15 @@ class Grid {
         this.juego.app.stage.addChild(this.gridContainer);
         //this.dibujarCuadricula();
     }
-
+    update(objeto) {
+        this.ajustarPosicion(objeto)
+        this.remove(objeto); // Eliminar el objeto de su celda actual
+        this.add(objeto); // Volver a agregar el objeto a la celda nueva
+    }
+    ajustarPosicion(objeto) {
+        objeto.x = Math.max(0, Math.min(objeto.x, this.cellSize * this.columns - 1));
+        objeto.y = Math.max(0, Math.min(objeto.y, this.cellSize * this.rows - 1));
+    }
     dibujarCuadricula() {
         const graphics = new PIXI.Graphics();
         graphics.lineStyle(1, 0xaaaaaa, 1); // Líneas grises con un grosor de 1
@@ -35,53 +57,75 @@ class Grid {
         }
         this.gridContainer.addChild(graphics);
     }
+    obtenerCeldaPorPosicion(x, y) {
+        const xIndex = Math.floor(x / this.cellSize);
+        const yIndex = Math.floor(y / this.cellSize);
 
-    getCell(x, y) {
-        const col = Math.floor(x / this.cellSize);
-        const row = Math.floor(y / this.cellSize);
-        if (col < 0 || col >= this.columns || row < 0 || row >= this.rows) {
-            return null; // Evitar valores fuera del rango
+        // Asegúrate de que no se salga de los límites
+        if (xIndex >= 0 && xIndex < this.columns && yIndex >= 0 && yIndex < this.rows) {
+            return this.cells[yIndex][xIndex]; // Devuelve la celda correcta
         }
-        return this.cells[row][col];
-    }
 
-    add(objeto) {
-        const celda = this.getCell(objeto.x, objeto.y);
-        if (!celda) {
-            console.warn(`El objeto está fuera de la cuadrícula. x: ${objeto.x}, y: ${objeto.y}`);
-            return;
+        return null; // Si la celda está fuera de los límites
+    }
+    miCeldaActual(objeto) {
+        const cell = this.getCell(objeto.x, objeto.y);  // Usamos las coordenadas del objeto
+        if (cell) {
+            objeto.miCeldaActual = cell; // Asignamos la celda actual al objeto
         }
-        celda.objetos.push(objeto);
+        return cell;
     }
-
     remove(objeto) {
         if (objeto.miCeldaActual) {
-            objeto.miCeldaActual.sacar(objeto);
+            objeto.miCeldaActual.sacar(objeto); // Eliminar objeto de su celda actual
         }
+    }
+    add(objeto) {
+        const cell = this.getCell(objeto.x, objeto.y); // Obtener la nueva celda según las nuevas coordenadas
+        if (!cell) {
+            console.error("No se pudo encontrar la celda para el objeto:", objeto);
+            return;
+        }
+        objeto.miCeldaActual = cell; // Asignar la celda correcta al objeto
+        cell.objetos.push(objeto);    // Agregar el objeto a la celda correspondiente
     }
 
     // Detectar objetos dentro del rango de visión del tiburón
-    obtenerVecinosEnRango(x, y, rango) {
-        const vecinos = [];
-        const col = Math.floor(x / this.cellSize);
-        const row = Math.floor(y / this.cellSize);
+    obtenerVecinos(tipoObjeto, margen = 1) {
+        let vecinos = [];
+        const xIndex = Math.floor(this.container.x / this.cellSize);
+        const yIndex = Math.floor(this.container.y / this.cellSize);
 
-        // Calculamos el radio de visión del tiburón y buscamos en las celdas cercanas
-        const rangoCelda = Math.floor(rango / this.cellSize);  // Convertimos el rango a número de celdas
+        // Itera sobre las celdas adyacentes en el rango
+        for (let i = -margen; i <= margen; i++) {
+            for (let j = -margen; j <= margen; j++) {
+                const celda = this.getCell(
+                    (xIndex + i) * this.cellSize,
+                    (yIndex + j) * this.cellSize
+                );
 
-        for (let i = -rangoCelda; i <= rangoCelda; i++) {
-            for (let j = -rangoCelda; j <= rangoCelda; j++) {
-                const vecinoCol = col + i;
-                const vecinoRow = row + j;
-
-                // Verificar si la celda está dentro de los límites de la cuadrícula
-                if (vecinoCol >= 0 && vecinoCol < this.columns && vecinoRow >= 0 && vecinoRow < this.rows) {
-                    const celda = this.cells[vecinoRow][vecinoCol];
-                    vecinos.push(...celda.objetos); // Agregar todos los objetos en esa celda
+                // Verifica si la celda existe y tiene objetos
+                if (celda && Array.isArray(celda.objetos)) {
+                    // Filtra solo los objetos que sean instancias de la clase tipoObjeto
+                    vecinos = [
+                        ...vecinos,
+                        ...celda.objetos.filter((obj) => obj instanceof tipoObjeto && obj !== this),
+                    ];
                 }
             }
         }
 
         return vecinos;
+    }
+    getCell(x, y) {
+        const xIndex = Math.floor(x / this.cellSize);
+        const yIndex = Math.floor(y / this.cellSize);
+
+        // Asegúrate de que no se salga de los límites
+        if (xIndex >= 0 && xIndex < this.columns && yIndex >= 0 && yIndex < this.rows) {
+            return this.cells[yIndex][xIndex]; // Devuelve la celda correcta
+        }
+
+        return null; // Si la celda está fuera de los límites
     }
 }

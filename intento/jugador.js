@@ -3,6 +3,9 @@ class Jugador {
         // Crear el contenedor para el sprite del jugador
         this.sprite = new PIXI.Container();
         this.app = app;
+        this.sprite.x = 500
+        this.sprite.y = 8500
+        
 
         // Cambiar el centro del sprite para que el buzo se vea bien al girar
         this.sprite.pivot.set(16, 16); // Ajustar según el centro del sprite, si es necesario

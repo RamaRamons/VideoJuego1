@@ -29,17 +29,19 @@ class Juego {
     
         // Crear 20 peces en el centro
         for (let i = 0; i < 20; i++) {
-            const pez = new Pez(this, window.innerWidth / 2, window.innerHeight / 2, 1, 100, 1);
+            const pez = new Pez(this, 500 , 8500, 1, 100, 1);
             this.peces.push(pez);
             this.grid.add(pez); // Añadir a la rejilla
         }
     
         // Crear tiburones en posiciones aleatorias
-        const stageWidth = 3000;
-        const stageHeight = 3000;
+        const stageWidth = 9000;  // Usar el ancho real de la ventana
+        const stageHeight = 9000; // Usar el alto real de la ventana
         const enemySize = 15;
     
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 100; i++) {
+            //const posicionX = Math.random() * (stageWidth - enemySize * 2) + enemySize;
+            //const posicionY = Math.random() * (stageHeight - enemySize * 2) + enemySize;
             const posicionX = Math.random() * (stageWidth - enemySize * 2) + enemySize;
             const posicionY = Math.random() * (stageHeight - enemySize * 2) + enemySize;
             const tiburon = new Tiburon1(this, posicionX, posicionY, 1);
@@ -47,7 +49,7 @@ class Juego {
             this.grid.add(tiburon); // Añadir a la rejilla
         }
     
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 100; i++) {
             const posicionX = Math.random() * (stageWidth - enemySize * 2) + enemySize;
             const posicionY = Math.random() * (stageHeight - enemySize * 2) + enemySize;
             const tiburon = new Tiburon2(this, posicionX, posicionY, 1);
@@ -176,7 +178,6 @@ class Juego {
 
     update() {
         const centro = this.calcularCentro();
-        
         //esto hace que el stage este centrado en el medio de la pantalla
         this.app.stage.position.x = this.app.renderer.width / 2;
         this.app.stage.position.y = this.app.renderer.height / 2;

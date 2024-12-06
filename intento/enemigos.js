@@ -1,13 +1,16 @@
-class Enemigo {
+class Enemigo extends Entidad {
     constructor(juego, x, y, velocidadMax) {
+        super(juego, x, y, velocidadMax);
         this.juego = juego;
         this.grid = juego.grid;
         this.x = x;
         this.y = y;
+        this.container.x = this.container.x
+        this.container.y = this.container.y
         this.velocidadMax = velocidadMax || 0.1;
         this.vel = { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 };
-        this.radioVisionPursuit = 150;
-        this.radioVisionPerder = 160;
+        this.radioVisionCeldas = 1;
+        this.radioVisionPerder = 2;
         this.size = 15;
         this.separacionMinima = 100;
 
@@ -15,23 +18,23 @@ class Enemigo {
         this.ultimoCambio = Date.now();  // Momento en que se cambió la dirección por última vez
         this.nuevaDireccion = { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 }; // Nueva dirección aleatoria
         this.suavizado = 0.05;
+    }
+
+    update() {
+        super.update(this);
         
-    }
-
-    
-    detectarObjetosVecinos() {
-        const vecinos = this.grid.obtenerVecinosEnRango(this.x, this.y, this.radioVisionPursuit);  // Usamos el radio de visión
-        const pecesCercanos = vecinos.filter(objeto => objeto instanceof Pez);  // Filtramos solo los peces
-        return pecesCercanos;
-    }
-
-
-    update(tiburones) {
         this.cambioDeRumbo(); // Llamamos al cambio de rumbo para que el tiburón cambie dirección periódicamente
         this.movimientoAleatorio(); // Aplicamos el movimiento aleatorio con suavizado
 
-        const pecesCercanos = this.detectarObjetosVecinos();
-        //console.log(pecesCercanos);  // Puedes ver la lista de los peces cercanos
+        //this.container.x = this.juego.app.renderer.plugins.interaction.mouse.global.x + this.juego.app.stage.pivot.x - this.juego.app.stage.x;
+        //this.container.y = this.juego.app.renderer.plugins.interaction.mouse.global.y + this.juego.app.stage.pivot.y - this.juego.app.stage.y;
+        //this.x = this.juego.app.renderer.plugins.interaction.mouse.global.x + this.juego.app.stage.pivot.x - this.juego.app.stage.x;
+        //this.y = this.juego.app.renderer.plugins.interaction.mouse.global.y + this.juego.app.stage.pivot.y - this.juego.app.stage.y;
+
+
+        const pecesCercanos = this.obtenerVecinos(Pez, this.radioVisionCeldas); // Busca solo objetos del tipo `Pez`
+
+        //console.log("Peces cercanos detectados:", pecesCercanos);
 
         // Actualizamos la posición del tiburón con la nueva velocidad
         this.x += this.vel.x;
