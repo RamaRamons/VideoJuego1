@@ -22,7 +22,7 @@ class Jugador {
 
         // Configurar la animación inicial
         this.direccionActual = "nadando derecha";
-        this.sprite.scale.set(0.3);  // Escala el jugador al 30% de su tamaño original
+        this.sprite.scale.set(0.2);  // Escala el jugador al 30% de su tamaño original (era de 0.5)
         this.sprite.addChild(this.animaciones[this.direccionActual]);
         this.animaciones[this.direccionActual].play();
         this.sprite.pivot.set(650 , 650)

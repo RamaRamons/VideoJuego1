@@ -8,7 +8,7 @@ class Pez extends Entidad {
         this.aceleracion = { x: 0, y: 0 };
         this.velocidadMax = velocidadMax;
         this.radioVision = radioVision;
-        this.size = 7;
+        this.size = 3;  // su tamaño era de 7
         this.estado = 'vivo';
         this.direccion = 'derecha';
         this.tiempoEsperaMuerte = 5 // Tiempo a esperar al morir

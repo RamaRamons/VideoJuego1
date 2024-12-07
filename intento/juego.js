@@ -34,36 +34,40 @@ class Juego {
             this.grid.add(pez); // Añadir a la rejilla
         }
     
-        // Crear tiburones en posiciones aleatorias
-        const stageWidth = 9000;  // Usar el ancho real de la ventana
-        const stageHeight = 9000; // Usar el alto real de la ventana
-        const enemySize = 15;
-    
-        for (let i = 0; i < 100; i++) {
-            //const posicionX = Math.random() * (stageWidth - enemySize * 2) + enemySize;
-            //const posicionY = Math.random() * (stageHeight - enemySize * 2) + enemySize;
-            const posicionX = Math.random() * (stageWidth - enemySize * 2) + enemySize;
-            const posicionY = Math.random() * (stageHeight - enemySize * 2) + enemySize;
-            const tiburon = new Tiburon1(this, posicionX, posicionY, 1);
-            this.enemigos.push(tiburon);
-            this.grid.add(tiburon); // Añadir a la rejilla
-        }
-    
-        for (let i = 0; i < 100; i++) {
-            const posicionX = Math.random() * (stageWidth - enemySize * 2) + enemySize;
-            const posicionY = Math.random() * (stageHeight - enemySize * 2) + enemySize;
-            const tiburon = new Tiburon2(this, posicionX, posicionY, 1);
-            this.enemigos.push(tiburon);
-            this.grid.add(tiburon); // Añadir a la rejilla
-        }
-    
         // Inicializar la cámara
         this.camera = new Camera();
         this.ultimaPosicion = { x: this.app.renderer.width / 2, y: this.app.renderer.height / 2 };
     
         // Cargar los recursos y luego iniciar el jugador
         this.cargarRecursos();
-    }    
+    }
+    
+    crearEnemigos() {
+        // Obtener los JSON cargados desde el loader
+        const tiburon1JSON = PIXI.Loader.shared.resources["sprites/tiburones/tiburon1.json"];
+        const tiburon2JSON = PIXI.Loader.shared.resources["sprites/tiburones/tiburon2.json"];
+    
+        // Crear tiburones en posiciones aleatorias
+        const stageWidth = 9000;
+        const stageHeight = 9000;
+        const enemySize = 5;
+    
+        for (let i = 0; i < 100; i++) {
+            const posicionX = Math.random() * (stageWidth - enemySize * 2) + enemySize;
+            const posicionY = Math.random() * (stageHeight - enemySize * 2) + enemySize;
+            const tiburon = new Tiburon1(this, posicionX, posicionY, 1, tiburon1JSON);
+            this.enemigos.push(tiburon);
+            this.grid.add(tiburon); // Añadir a la rejilla
+        }
+    
+        for (let i = 0; i < 100; i++) {
+            const posicionX = Math.random() * (stageWidth - enemySize * 2) + enemySize;
+            const posicionY = Math.random() * (stageHeight - enemySize * 2) + enemySize;
+            const tiburon = new Tiburon2(this, posicionX, posicionY, 1, tiburon2JSON);
+            this.enemigos.push(tiburon);
+            this.grid.add(tiburon); // Añadir a la rejilla
+        }
+    }
 
     agregarFiltroAgua() {
         // Asegurarse de que la textura esté correctamente cargada
@@ -142,9 +146,12 @@ class Juego {
             .add("sprites/buzo/animacionarriba/izquierda/BuzoIzquierdaArriba.json")
             .add("sprites/buzo/animacionabajo/derecha/BuzoDerechaAbajo.json")
             .add("sprites/buzo/animacionabajo/izquierda/BuzoIzquierdaAbajo.json")
+            .add("sprites/tiburones/tiburon1.json")
+            .add("sprites/tiburones/tiburon2.json")
             .load(() => {
                 // Iniciar el jugador una vez que los recursos están cargados
                 this.iniciarJugador();
+                this.crearEnemigos();
                 // Iniciar el bucle de actualización de PixiJS
                 this.app.ticker.add(() => this.update());
             });
@@ -208,7 +215,7 @@ class Juego {
             pez.update(this.peces);}
 
         for (let enemigo of this.enemigos) {
-            enemigo.update(this.peces, this.enemigos);}
+            enemigo.update();}
     
 
         if (this.jugador) {
