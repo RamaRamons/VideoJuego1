@@ -144,6 +144,7 @@ class Enemigo extends Entidad {
             this.vel.y *= -1;
         }
     }
+    
 
 }
 

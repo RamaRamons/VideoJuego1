@@ -6,9 +6,10 @@ class Pez extends Entidad {
         this.y = y;
         this.vel = { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 };
         this.aceleracion = { x: 0, y: 0 };
+        this.radioVisionCeldas = 2;
         this.velocidadMax = velocidadMax;
         this.radioVision = radioVision;
-        this.size = 3;  // su tamaño era de 7
+        this.size = 7;
         this.estado = 'vivo';
         this.direccion = 'derecha';
         this.tiempoEsperaMuerte = 5 // Tiempo a esperar al morir
@@ -37,7 +38,6 @@ class Pez extends Entidad {
         this.container.scale.set(0.05); // Ajusta el tamaño si es necesario
         this.juego.app.stage.addChild(this.container);
     }
-
     cambiarSprite(direccion, estado) {
         if (estado === 'vivo') {
             this.sprite.texture = this.texturasMovimiento[direccion];
@@ -54,7 +54,11 @@ class Pez extends Entidad {
     }
 
     update(peces) {
+        
         if (this.estado === 'vivo') {
+            
+            //this.mirarAlrededor()
+            
             // Forzar la dirección de movimiento cuando esté cerca de los bordes
             if (this.x < 50) {
                 this.vel.x = Math.abs(this.vel.x); // Mover a la derecha
@@ -65,8 +69,25 @@ class Pez extends Entidad {
             if (this.y < 50) {
                 this.vel.y = Math.abs(this.vel.y); // Mover hacia abajo
             } else if (this.y > this.juego.app.screen.height - 50) {
-                this.vel.y = -Math.abs(this.vel.y); // Mover hacia arriba
+                this.vel.y = -Math.abs(this.vel.y); // Mover hacia arriba   
             }
+            const tiburones = this.obtenerVecinos(Enemigo, this.radioVisionCeldas);
+
+            if (tiburones.length > 0) {
+                let tiburonMasCercano = this.encontrarTiburonMasCercano(tiburones); // Llamamos a la función personalizada
+                if (tiburonMasCercano) {  // Verificamos que haya encontrado un tiburón
+                    let escape = { x: this.x - tiburonMasCercano.x, y: this.y - tiburonMasCercano.y };
+                    escape = this.normalize(escape);
+            
+                    // Ajustar intensidad de la fuerza de escape
+                    escape.x *= 1.5;
+                    escape.y *= 1.5;
+                    
+                    // Aplicar la fuerza de escape
+                    this.aplicarFuerza(escape);
+                }
+            }
+            //console.log(tiburones)
 
             // Fuerzas de cohesión, separación y alineación
             let cohesion = this.cohesion(peces);
@@ -118,6 +139,21 @@ class Pez extends Entidad {
             }
         }
         super.update()
+    }
+    encontrarTiburonMasCercano(tiburones) {
+        let tiburonMasCercano = null;
+        let distanciaMinima = 200;  // Iniciar con un valor alto
+
+        for (let tiburon of tiburones) {
+            const distanciaActual = this.distancia(tiburon);  // Usar la función de distancia
+            
+            if (distanciaActual < distanciaMinima) {
+                tiburonMasCercano = tiburon;  // Guardar el tiburón más cercano
+                distanciaMinima = distanciaActual;  // Actualizar la distancia mínima
+            }
+        }
+
+        return tiburonMasCercano;  // Retornar el tiburón más cercano
     }
 
     cohesion(peces) {

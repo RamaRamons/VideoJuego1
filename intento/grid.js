@@ -57,6 +57,22 @@ class Grid {
         }
         this.gridContainer.addChild(graphics);
     }
+    obtenerCeldasVecinas() {
+        let vecinos = [];
+    
+        const margen = 1;
+        // Revisar celdas adyacentes
+        for (let i = this.x - margen; i <= this.x + margen; i++) {
+          for (let j = this.y - margen; j <= this.y + margen; j++) {
+            const celda = this.juego.grid.getCell(i, j);
+    
+            if (celda && celda != this) {
+              vecinos.push(celda);
+            }
+          }
+        }
+        return vecinos;
+      }
     obtenerCeldaPorPosicion(x, y) {
         const xIndex = Math.floor(x / this.cellSize);
         const yIndex = Math.floor(y / this.cellSize);
