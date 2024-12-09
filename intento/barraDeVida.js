@@ -30,6 +30,8 @@ class BarraVida {
         this.container.addChild(this.vida);
         this.container.addChild(this.textoVida);
 
+        this.container.zIndex = 100;
+
         // Añadir el contenedor al escenario
         this.juego.app.stage.addChild(this.container);
         console.log('Contenedor agregado al stage:', this.container);
@@ -71,18 +73,17 @@ class BarraVida {
 
         this.actualizarVida();
 
-        const centro = this.juego.calcularCentro(); // Esto debe devolverte la posición de la cámara, como el centro de la vista
+        const centro = this.juego.calcularCentro();
 
-
-        this.container.x = centro.x - (this.juego.app.renderer.width / 2) + 20;  // Ajuste proporcional con respecto a la cámara
-        this.container.y = centro.y - (this.juego.app.renderer.height / 2) + 20;  // Ajuste proporcional con respecto a la cámara
-
-        const vidaAncho = this.fondo.width; // Ancho actual de la barra de vida (dependiendo de la vida)
-        const textoAncho = this.textoVida.width; // Ancho del texto
+        this.container.x = centro.x - (this.juego.app.renderer.width / 2) + 20;
+        this.container.y = centro.y - (this.juego.app.renderer.height / 2) + 20;
+        
+        const vidaAncho = this.fondo.width;
+        const textoAncho = this.textoVida.width;
 
         
 
-        this.textoVida.x = (vidaAncho - textoAncho) / 2; // Centrar el texto dentro de la barra
+        this.textoVida.x = (vidaAncho - textoAncho) / 2;
 
     }
 }

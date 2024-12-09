@@ -46,7 +46,7 @@ class Juego {
         this.posicionFinal = { x: 0, y: 0 }; // Última posición del último pez
 
         this.barraDeVida = new BarraVida(this, this.peces.length, this.peces);
-        console.log('Barra de vida creada:', this.barraDeVida); // Depuración
+        this.tutorial = new Tutorial(this)
     
         // Cargar los recursos y luego iniciar el jugador
         this.cargarRecursos();
@@ -77,6 +77,7 @@ class Juego {
             this.enemigos.push(tiburon);
             this.grid.add(tiburon); // Añadir a la rejilla
         }
+        this.contadorDeTiburones = new Contador(this, this.enemigos.length, this.enemigos);
     }
 
     agregarFiltroAgua() {
@@ -231,7 +232,7 @@ class Juego {
         // Mantener los efectos visuales como el filtro y overlay
         this.waterOverlay.tilePosition.x += 0.5;
         this.waterOverlay.tilePosition.y += 0.3;
-
+        
         // Otros cálculos y actualizaciones
         if (this.jugador) {
             this.jugador.apuntarHaciaMouse(
@@ -254,6 +255,8 @@ class Juego {
             this.jugador.apuntarHaciaMouse(this.app.renderer.plugins.interaction.mouse.global.x, this.app.renderer.plugins.interaction.mouse.global.y);
         }
         this.barraDeVida.update()
+        this.contadorDeTiburones.update()
+        this.tutorial.update()
       }
     }
 }
