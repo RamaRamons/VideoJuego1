@@ -7,6 +7,7 @@ class Juego {
     
         // Configurar MatterJS
         this.engine = Matter.Engine.create();
+        this.contadorDeFrames = 0
         this.world = this.engine.world;
         this.gravity = this.world.gravity;
         this.gravity.scale = 0.0003; // Gravedad baja para simular agua
@@ -29,7 +30,7 @@ class Juego {
     
         // Crear 20 peces en el centro
         for (let i = 0; i < 20; i++) {
-            const pez = new Pez(this, 500 , 8500, 1, 100, 1);
+            const pez = new Pez(this, 500 , 8500, 1.5, 100, 1);
             this.peces.push(pez);
             this.grid.add(pez); // Añadir a la rejilla
         }
@@ -37,6 +38,9 @@ class Juego {
         // Inicializar la cámara
         this.camera = new Camera();
         this.ultimaPosicion = { x: this.app.renderer.width / 2, y: this.app.renderer.height / 2 };
+
+        this.camaraFija = false; // Indica si la cámara debe quedarse quieta
+        this.posicionFinal = { x: 0, y: 0 }; // Última posición del último pez
     
         // Cargar los recursos y luego iniciar el jugador
         this.cargarRecursos();
@@ -52,7 +56,7 @@ class Juego {
         const stageHeight = 9000;
         const enemySize = 5;
     
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 150; i++) {
             const posicionX = Math.random() * (stageWidth - enemySize * 2) + enemySize;
             const posicionY = Math.random() * (stageHeight - enemySize * 2) + enemySize;
             const tiburon = new Tiburon1(this, posicionX, posicionY, 1, tiburon1JSON);
@@ -60,7 +64,7 @@ class Juego {
             this.grid.add(tiburon); // Añadir a la rejilla
         }
     
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 150; i++) {
             const posicionX = Math.random() * (stageWidth - enemySize * 2) + enemySize;
             const posicionY = Math.random() * (stageHeight - enemySize * 2) + enemySize;
             const tiburon = new Tiburon2(this, posicionX, posicionY, 1, tiburon2JSON);
@@ -154,7 +158,20 @@ class Juego {
                 this.crearEnemigos();
                 // Iniciar el bucle de actualización de PixiJS
                 this.app.ticker.add(() => this.update());
-            });
+            });   
+    }
+
+    eliminarPez(pez) {
+        // Remover el pez del array de peces
+        const index = this.peces.indexOf(pez);
+        if (index !== -1) {
+            this.peces.splice(index, 1);
+        }
+    
+        // Remover el contenedor del pez del stage
+        if (pez.container && pez.container.parent) {
+            pez.container.parent.removeChild(pez.container);
+        }
     }
 
     iniciarJugador() {
@@ -164,37 +181,45 @@ class Juego {
     }
 
     calcularCentro() {
+        if (this.peces.length === 0) {
+            // Si no quedan peces, devolver la posición fija
+            this.camaraFija = true; // Activar modo de cámara fija
+            return this.posicionFinal; // Retornar última posición registrada
+        }
+    
+        // Calcular el centro de todos los peces vivos
         let totalX = 0;
         let totalY = 0;
-
+    
         this.peces.forEach((pez) => {
             totalX += pez.x;
             totalY += pez.y;
         });
-
+    
         const centroX = totalX / this.peces.length;
         const centroY = totalY / this.peces.length;
-        
-        if (this.peces.length === 0) {
-            return this.ultimaPosicion;
-        }
-        this.ultimaPosicion = { x: centroX, y: centroY };
-
+    
+        // Registrar la posición del último pez vivo
+        this.posicionFinal = { x: centroX, y: centroY };
+    
         return { x: centroX, y: centroY };
     }
 
     update() {
         const centro = this.calcularCentro();
         //esto hace que el stage este centrado en el medio de la pantalla
-        this.app.stage.position.x = this.app.renderer.width / 2;
-        this.app.stage.position.y = this.app.renderer.height / 2;
-
-        this.app.stage.pivot.x = centro.x
-        this.app.stage.pivot.y = centro.y        
-        
-        //esto hace que el filtro de agua este en el mismo lugar que el centro de los peces
-        this.waterOverlay.x = centro.x - this.app.renderer.width / 2;
-        this.waterOverlay.y = centro.y - this.app.renderer.height / 2;
+        if (!this.camaraFija) {
+            // Si la cámara no está fija, sigue a los peces
+            this.app.stage.position.x = this.app.renderer.width / 2;
+            this.app.stage.position.y = this.app.renderer.height / 2;
+    
+            this.app.stage.pivot.x = centro.x;
+            this.app.stage.pivot.y = centro.y;
+    
+            // Ajustar la posición del filtro de agua
+            this.waterOverlay.x = centro.x - this.app.renderer.width / 2;
+            this.waterOverlay.y = centro.y - this.app.renderer.height / 2;
+        }
 
         // Mantener los efectos visuales como el filtro y overlay
         this.waterOverlay.tilePosition.x += 0.5;

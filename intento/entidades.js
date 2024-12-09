@@ -6,7 +6,6 @@ class Entidad {
       this.juego = juego;
       this.container = new PIXI.Container();
       this.juego.app.stage.addChild(this.container);
-      this.listo = false;
       this.container.x = x;
       this.container.y = y;
   
@@ -120,7 +119,38 @@ class Entidad {
 
       //console.log(`Vecinos encontrados:`, vecinos);
       return vecinos;
-  }
+    }
+    encontrarVecinoMasCercano(vecinos) {
+      if (!vecinos || vecinos.length === 0) {
+          return null; // No hay vecinos
+      }
+  
+      let distanciaMinima = Infinity;
+      let vecinoMasCercano = null;
+  
+      vecinos.forEach(vecino => {
+          const dx = vecino.container.x - this.container.x;
+          const dy = vecino.container.y - this.container.y;
+          const distancia = Math.sqrt(dx * dx + dy * dy);
+  
+          if (distancia < distanciaMinima) {
+              distanciaMinima = distancia;
+              vecinoMasCercano = vecino;
+          }
+      });
+  
+      return vecinoMasCercano;
+    }
+    obtenerPosicionDeVecino(vecino) {
+      if (!vecino || !vecino.container) {
+          return { x: 0, y: 0 }; // Valores por defecto
+      }
+  
+      return {
+          x: vecino.container.x,
+          y: vecino.container.y
+      };
+  } 
     update() {
       //this.normalizarVelocidad();
   
@@ -130,6 +160,10 @@ class Entidad {
       //console.log(`Nueva posición del tiburón: (${this.container.x}, ${this.container.y})`);
       this.actualizarZIndex();
       //this.actualizarLado();
+
+      // Actualizar el contenedor
+      this.container.x = this.x;
+      this.container.y = this.y;
       
     }
     actualizarPosicionEnGrid() {

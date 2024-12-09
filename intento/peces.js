@@ -8,7 +8,10 @@ class Pez extends Entidad {
         this.aceleracion = { x: 0, y: 0 };
         this.radioVisionCeldas = 2;
         this.velocidadMax = velocidadMax;
+        this.equipoParaUpdate = Math.floor(Math.random() * 9) + 1;
         this.radioVision = radioVision;
+        this.listo = true
+        this.vision = 200
         this.size = 7;
         this.estado = 'vivo';
         this.direccion = 'derecha';
@@ -41,6 +44,8 @@ class Pez extends Entidad {
     cambiarSprite(direccion, estado) {
         if (estado === 'vivo') {
             this.sprite.texture = this.texturasMovimiento[direccion];
+        } else if (estado === 'huyendo') {
+            this.sprite.texture = this.texturasMovimiento[direccion];
         } else if (estado === 'muerto') {
             this.sprite.texture = this.texturasMuerte1[direccion];
         } else if (estado === 'caida') {
@@ -54,12 +59,51 @@ class Pez extends Entidad {
     }
 
     update(peces) {
-        
-        if (this.estado === 'vivo') {
-            
-            //this.mirarAlrededor()
-            
-            // Forzar la dirección de movimiento cuando esté cerca de los bordes
+        if (this.estado === 'muerto') {
+            // Incrementa el tiempo en estado "muerto"
+            this.cambiarSprite(this.direccion, this.estado);
+            this.tiempoMuerto += this.juego.app.ticker.deltaMS;
+    
+            if (this.tiempoMuerto >= this.tiempoEsperaMuerte * 1000) { // Cambiar a "caída" tras el tiempo de espera
+                this.estado = 'caida';
+                this.cambiarSprite(this.direccion, this.estado);
+                this.vel.y = 0.1; // Velocidad inicial de caída
+                this.tiempoMuerto = 0; // Reiniciar contador para manejar el tiempo en caída
+            }
+            return;
+        }
+    
+        if (this.estado === 'caida') {
+            // Incrementar el tiempo de caída
+            this.tiempoMuerto += this.juego.app.ticker.deltaMS;
+    
+            // Simular caída
+            this.vel.y += 0.05; // Efecto de gravedad
+            this.x += this.vel.x;
+            this.y += this.vel.y;
+    
+            // Actualizar posición en pantalla
+            this.container.x = this.x;
+            this.container.y = this.y;
+    
+            // Eliminar el pez después de 5 segundos en caída
+            if (this.tiempoMuerto >= 5000) {
+                this.juego.eliminarPez(this); // Llama al método para eliminar el pez
+            }
+            return;
+        }
+
+        // Solo continuar con las lógicas de movimiento y cambio de estado si no está muerto
+        console.log(this.estado);
+        this.segunDatosCambiarDeEstado();
+        this.mirarEntorno();
+
+        if (!this.listo) return;
+
+        if (this.estado === 'vivo' || this.estado === 'huyendo') {
+            // Lógica de movimiento y otras reglas si está vivo o huyendo
+
+            // Reglas de bordes (mantener al pez dentro del área)
             if (this.x < 50) {
                 this.vel.x = Math.abs(this.vel.x); // Mover a la derecha
             } else if (this.x > this.juego.app.screen.width - 50) {
@@ -69,25 +113,8 @@ class Pez extends Entidad {
             if (this.y < 50) {
                 this.vel.y = Math.abs(this.vel.y); // Mover hacia abajo
             } else if (this.y > this.juego.app.screen.height - 50) {
-                this.vel.y = -Math.abs(this.vel.y); // Mover hacia arriba   
+                this.vel.y = -Math.abs(this.vel.y); // Mover hacia arriba
             }
-            const tiburones = this.obtenerVecinos(Enemigo, this.radioVisionCeldas);
-
-            if (tiburones.length > 0) {
-                let tiburonMasCercano = this.encontrarTiburonMasCercano(tiburones); // Llamamos a la función personalizada
-                if (tiburonMasCercano) {  // Verificamos que haya encontrado un tiburón
-                    let escape = { x: this.x - tiburonMasCercano.x, y: this.y - tiburonMasCercano.y };
-                    escape = this.normalize(escape);
-            
-                    // Ajustar intensidad de la fuerza de escape
-                    escape.x *= 1.5;
-                    escape.y *= 1.5;
-                    
-                    // Aplicar la fuerza de escape
-                    this.aplicarFuerza(escape);
-                }
-            }
-            //console.log(tiburones)
 
             // Fuerzas de cohesión, separación y alineación
             let cohesion = this.cohesion(peces);
@@ -96,7 +123,7 @@ class Pez extends Entidad {
 
             // Ajustar fuerzas
             cohesion.x *= 0.03; cohesion.y *= 0.03;
-            separacion.x *= 0.5; separacion.y *= 0.5; 
+            separacion.x *= 0.5; separacion.y *= 0.5;
             alineacion.x *= 0.1; alineacion.y *= 0.1;
 
             // Aplicar fuerzas
@@ -108,37 +135,100 @@ class Pez extends Entidad {
             this.vel.x += this.aceleracion.x;
             this.vel.y += this.aceleracion.y;
             this.vel = this.normalize(this.vel);
-            this.vel.x *= this.velocidadMax;
-            this.vel.y *= this.velocidadMax;
 
+            // Aquí aplicamos la velocidad extra si el pez está huyendo
+            if (this.estado === 'huyendo') {
+                const factorDeEscape = 0.3;  // Suavizado de la velocidad para la huida
+                // Aceleración suave hacia la dirección opuesta
+                this.vel.x = this.vel.x * (1 + factorDeEscape); // Acelera gradualmente
+                this.vel.y = this.vel.y * (1 + factorDeEscape); // Acelera gradualmente
+            }
+
+            // Limitar la velocidad máxima
+            this.vel.x = Math.min(this.vel.x, this.velocidadMax);
+            this.vel.y = Math.min(this.vel.y, this.velocidadMax);
+
+            // Actualizar posición
             this.x += this.vel.x;
             this.y += this.vel.y;
             this.aceleracion = { x: 0, y: 0 };
 
-            // Determinar la dirección para el sprite
+            // Determinar la dirección del sprite
             this.direccion = this.vel.x > 0 ? 'derecha' : 'izquierda';
             this.cambiarSprite(this.direccion, this.estado);
 
-            // Actualizar la posición del contenedor
-            this.container.x = this.x;
-            this.container.y = this.y;
-        } else if (this.estado === 'muerto') {
-            this.tiempoMuerto += this.juego.app.ticker.deltaMS; // Tiempo que ha pasado
-            if (this.tiempoMuerto >= this.tiempoEsperaMuerte) {
-                this.estado = 'caida';
-                this.cambiarSprite(this.direccion, this.estado);
-                this.vel.y = 0.1; // Velocidad de caída
-            }
-        } else if (this.estado === 'caida') {
-            this.vel.y += 0.05; // Aumentar la gravedad
-            this.x += this.vel.x;
-            this.y += this.vel.y;
+            
 
-            if (this.tiempoMuerto >= 5000) { // Tiempo de caída de 5 segundos
-                this.juego.eliminarPez(this); // Eliminar el pez
+            if (this.estado === 'huyendo') {
+                const tiburon = this.obtenerVecinos(Enemigo, this.radioVisionCeldas);
+            
+                if (tiburon.length > 0) {
+                    let tiburonMasCercano = this.encontrarTiburonMasCercano(tiburon);
+                    if (tiburonMasCercano) {
+                        let escape = { 
+                            x: this.x - tiburonMasCercano.x, 
+                            y: this.y - tiburonMasCercano.y 
+                        };
+            
+                        // Aquí aplicamos un lerp para suavizar el cambio de dirección
+                        // Lerp entre la dirección actual y la de escape
+                        this.vel.x = this.lerp(this.vel.x, escape.x, 0.1);  // 0.1 es el factor de suavizado, ajustable
+                        this.vel.y = this.lerp(this.vel.y, escape.y, 0.1);  // Lo mismo para el eje Y
+            
+                        // Suavizamos también el cambio de velocidad si es necesario
+                        this.vel.x = this.lerp(this.vel.x, escape.x, 0.1); // Gradual
+                        this.vel.y = this.lerp(this.vel.y, escape.y, 0.1); // Gradual
+            
+                        // Asegúrate de que la velocidad no supere la velocidad máxima
+                        this.vel = this.normalize(this.vel);
+                    }
+                }
             }
         }
-        super.update()
+        super.update(this);
+    }
+    lerp(a, b, t) {
+        return a + (b - a) * t; // Interpolación lineal
+    }
+    mirarEntorno() {
+        this.vecinos = this.obtenerVecinos(Enemigo, this.radioVisionCeldas);
+        console.log(this.vecinos)
+        this.estoyViendoAlTiburon= this.evaluarSiEstoyViendoTiburon(this.vecinos);
+    }
+    segunDatosCambiarDeEstado() {
+        // Primero verifica si el tiburón está cerca
+        if (this.estoyViendoAlTiburon) {
+            this.estado = 'huyendo';
+        } else {
+            this.estado = 'vivo';
+        }
+    
+        // Verificar si el tiburón está dentro del radio de 10 píxeles
+        const tiburon = this.obtenerVecinos(Enemigo, this.radioVisionCeldas);
+        if (tiburon.length > 0) {
+            let tiburonMasCercano = this.encontrarTiburonMasCercano(tiburon);
+            if (tiburonMasCercano) {
+                const distancia = this.distancia(tiburonMasCercano);
+                if (distancia <= 10) {
+                    this.estado = 'muerto'; // El pez muere si está cerca del tiburón
+                }
+            }
+        }
+    }
+    evaluarSiEstoyViendoTiburon(tiburones) {
+        let tiburon = this.encontrarTiburonMasCercano(tiburones);
+        let tiburonsin = this.obtenerPosicionDeVecino(tiburon);
+        const distanciaCuadrada = distanciaAlCuadrado(
+          this.container.x,
+          this.container.y,
+          tiburonsin.x,
+          tiburonsin.y
+        );
+    
+        if (distanciaCuadrada < this.vision ** 2) {
+          return true;
+        }
+        return false;
     }
     encontrarTiburonMasCercano(tiburones) {
         let tiburonMasCercano = null;

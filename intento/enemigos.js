@@ -52,6 +52,7 @@ class Enemigo extends Entidad {
 
     update() {
         super.update(this);
+
         
         this.cambioDeRumbo(); // Llamamos al cambio de rumbo para que el tiburón cambie dirección periódicamente
         this.movimientoAleatorio(); // Aplicamos el movimiento aleatorio con suavizado
@@ -63,9 +64,12 @@ class Enemigo extends Entidad {
 
 
         const pecesCercanos = this.obtenerVecinos(Pez, this.radioVisionCeldas); // Busca solo objetos del tipo `Pez`
+        const tiburonesCercanos = this.obtenerVecinos(Enemigo, this.radioVisionCeldas);
 
-        //console.log("Peces cercanos detectados:", pecesCercanos);
+        this.perseguirPez(pecesCercanos);
 
+        this.mantenerSeparacion(tiburonesCercanos);
+        
         // Actualizamos la posición del tiburón con la nueva velocidad
         this.x += this.vel.x;
         this.y += this.vel.y;
@@ -78,10 +82,66 @@ class Enemigo extends Entidad {
         this.sprite.y = this.y;
     }
 
-    perseguirPez(pez) {}
+    perseguirPez(peces) {
+        if (peces.length === 0) return;
+    
+        // Encontramos el pez más cercano
+        let pezMasCercano = peces[0];
+        let distanciaMinima = Math.hypot(this.x - pezMasCercano.x, this.y - pezMasCercano.y);
+    
+        // Recorremos todos los peces para encontrar el más cercano
+        for (let pez of peces) {
+            let distancia = Math.hypot(this.x - pez.x, this.y - pez.y);
+            if (distancia < distanciaMinima) {
+                distanciaMinima = distancia;
+                pezMasCercano = pez;
+            }
+        }
+    
+        // Movemos el tiburón hacia el pez más cercano
+        const direccion = {
+            x: pezMasCercano.x - this.x,
+            y: pezMasCercano.y - this.y
+        };
+    
+        // Normalizamos la dirección para evitar que la velocidad se descontrole
+        const direccionNormalizada = this.normalize(direccion);
+    
+        // Ajustamos la velocidad del tiburón para perseguir al pez
+        this.vel.x = direccionNormalizada.x * this.velocidadMax;
+        this.vel.y = direccionNormalizada.y * this.velocidadMax;
+    }
 
-    mantenerSeparacion(tiburones) {}
-
+    mantenerSeparacion(tiburones) {
+        let fuerzaSeparacion = { x: 0, y: 0 };
+    
+        // Recorremos todos los tiburones para calcular la fuerza de separación
+        for (const otroTiburon of tiburones) {
+            if (otroTiburon !== this) { // Evitar calcular la separación con uno mismo
+                const distanciaX = this.x - otroTiburon.x;
+                const distanciaY = this.y - otroTiburon.y;
+                const distancia = Math.hypot(distanciaX, distanciaY);
+    
+                // Si están demasiado cerca, aplicar fuerza de separación
+                if (distancia < this.separacionMinima) {
+                    const factorSeparacion = (this.separacionMinima - distancia) / this.separacionMinima;
+    
+                    // La fuerza de separación es inversamente proporcional a la distancia
+                    fuerzaSeparacion.x += (distanciaX / distancia) * factorSeparacion;
+                    fuerzaSeparacion.y += (distanciaY / distancia) * factorSeparacion;
+                }
+            }
+        }
+    
+        // Aplicar la fuerza de separación al vector de velocidad
+        this.vel.x += fuerzaSeparacion.x;
+        this.vel.y += fuerzaSeparacion.y;
+    
+        // Aseguramos que la velocidad no exceda la velocidad máxima
+        const velocidadNormalizada = this.normalize(this.vel);
+        this.vel.x = velocidadNormalizada.x * this.velocidadMax;
+        this.vel.y = velocidadNormalizada.y * this.velocidadMax;
+    }
     normalize(vector) {
         const magnitude = Math.hypot(vector.x, vector.y);  // Calcula la magnitud del vector
         return magnitude > 0 ? { x: vector.x / magnitude, y: vector.y / magnitude } : { x: 0, y: 0 };
