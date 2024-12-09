@@ -94,7 +94,7 @@ class Pez extends Entidad {
         }
 
         // Solo continuar con las lógicas de movimiento y cambio de estado si no está muerto
-        console.log(this.estado);
+        //console.log(this.estado);
         this.segunDatosCambiarDeEstado();
         this.mirarEntorno();
 
@@ -192,7 +192,7 @@ class Pez extends Entidad {
     }
     mirarEntorno() {
         this.vecinos = this.obtenerVecinos(Enemigo, this.radioVisionCeldas);
-        console.log(this.vecinos)
+        //console.log(this.vecinos)
         this.estoyViendoAlTiburon= this.evaluarSiEstoyViendoTiburon(this.vecinos);
     }
     segunDatosCambiarDeEstado() {

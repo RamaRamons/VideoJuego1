@@ -27,6 +27,9 @@ class Jugador {
         this.animaciones[this.direccionActual].play();
         this.sprite.pivot.set(650 , 650)
 
+        this.cooldownArpon = false; // Estado de cooldown
+        this.tiempoCooldown = 1000; // Tiempo de cooldown en milisegundos
+
         // Configurar la velocidad de movimiento
         this.velocidad = 3; // Cambia este valor para ajustar la velocidad
 
@@ -118,26 +121,21 @@ class Jugador {
     }
 
     lanzarArpon() {
-        // Crear un nuevo arpón y dispararlo en la dirección del mouse
-        const mouseX = this.app.renderer.plugins.interaction.mouse.global.x + this.app.stage.pivot.x - this.app.stage.x;
-        const mouseY = this.app.renderer.plugins.interaction.mouse.global.y + this.app.stage.pivot.y - this.app.stage.y;
 
-        const dx = mouseX - this.sprite.x;
-        const dy = mouseY - this.sprite.y;
+        if (this.cooldownArpon) return;
+        // Obtener las coordenadas del mouse en el espacio del juego
+          const mouseX = this.app.renderer.plugins.interaction.mouse.global.x + this.app.stage.pivot.x - this.app.stage.x;
+          const mouseY = this.app.renderer.plugins.interaction.mouse.global.y + this.app.stage.pivot.y - this.app.stage.y;
 
-        let direccionArpon;
+          // Crear y disparar el arpón
+          new Arpon(this.app, this.sprite.x, this.sprite.y, mouseX, mouseY);
 
-        // Determinar la dirección del arpón
-        if (Math.abs(dx) > Math.abs(dy)) {
-            direccionArpon = dx > 0 ? "derecha" : "izquierda";
-        } else {
-            if (dy > 0) {
-                direccionArpon = dx > 0 ? "derechaAbajo" : "izquierdaAbajo";
-            } else {
-                direccionArpon = dx > 0 ? "derechaArriba" : "izquierdaArriba";
-            }
-        }
-
-        new Arpon(this, direccionArpon);
+          this.activarCooldown();
+    }
+    activarCooldown() {
+        this.cooldownArpon = true;
+        setTimeout(() => {
+            this.cooldownArpon = false; // Cooldown terminado
+        }, this.tiempoCooldown);
     }
 }

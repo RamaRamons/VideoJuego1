@@ -31,7 +31,7 @@ class Grid {
 
         this.gridContainer = new PIXI.Container();
         this.juego.app.stage.addChild(this.gridContainer);
-        this.dibujarCuadricula();
+        //this.dibujarCuadricula();
     }
     update(objeto) {
         this.ajustarPosicion(objeto)

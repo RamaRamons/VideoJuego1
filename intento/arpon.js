@@ -1,81 +1,52 @@
 class Arpon {
-    constructor(jugador, direccion) {
-        // Crear un contenedor para el arpon, que se va a agregar al contenedor del jugador
-        this.sprite = new PIXI.Sprite();
-        this.jugador = jugador;
-        this.velocidad = 5; // Velocidad del arpón
-        this.direccion = direccion; // Dirección pasada al disparar
-        this.tiempoVida = 100; // Tiempo de vida del arpón antes de desaparecer
+    constructor(app, startX, startY, targetX, targetY) {
+        this.app = app;
+        this.velocidad = 10; // Velocidad del arpón
+        this.tiempoVida = 300; // Tiempo de vida en ticks (~5 segundos)
 
-        // Definir los sprites para el arpón en las diferentes direcciones
-        this.sprites = {
-            "izquierda": PIXI.Texture.from("sprites/arpon/izquierda.png"),
-            "izquierdaArriba": PIXI.Texture.from("sprites/arpon/arribaIzquierda.png"),
-            "izquierdaAbajo": PIXI.Texture.from("sprites/arpon/abajoIzquierda.png"),
-            "derecha": PIXI.Texture.from("sprites/arpon/derecha.png"),
-            "derechaArriba": PIXI.Texture.from("sprites/arpon/arribaDerecha.png"),
-            "derechaAbajo": PIXI.Texture.from("sprites/arpon/abajoDerecha.png"),
-        };
+        // Crear el sprite del arpón
+        this.sprite = new PIXI.Sprite(PIXI.Texture.from("sprites/arpon/derecha.png"));
+        this.sprite.anchor.set(0.5);
+        this.sprite.scale.set(0.25);
+        this.sprite.x = startX;
+        this.sprite.y = startY;
 
-        // Asignar el sprite inicial según la dirección del arpón
-        this.sprite.texture = this.sprites[this.direccion];
+        // Calcular la dirección normalizada hacia el objetivo
+        const dx = targetX - startX;
+        const dy = targetY - startY;
+        const magnitud = Math.sqrt(dx * dx + dy * dy);
+        this.velocidadX = (dx / magnitud) * this.velocidad;
+        this.velocidadY = (dy / magnitud) * this.velocidad;
 
-        // Posicionar el arpón en la posición del jugador
-        this.sprite.x = this.jugador.sprite.x;
-        this.sprite.y = this.jugador.sprite.y;
+        // Ajustar la rotación del arpón para que apunte hacia el objetivo
+        this.sprite.rotation = Math.atan2(dy, dx);
 
-        // Agregar el arpón al escenario
-        this.jugador.sprite.addChild(this.sprite);
+        // Agregar el sprite al escenario
+        app.stage.addChild(this.sprite);
 
-        // Empezar el movimiento
-        this.mover();
+        // Iniciar el movimiento del arpón
+        PIXI.Ticker.shared.add(this.mover, this);
     }
 
-    // Mover el arpón en la dirección de disparo
     mover() {
-        const dx = { 
-            "derecha": 1,
-            "izquierda": -1,
-            "derechaArriba": 1,
-            "izquierdaArriba": -1,
-            "derechaAbajo": 1,
-            "izquierdaAbajo": -1
-        };
-
-        const dy = {
-            "derecha": 0,
-            "izquierda": 0,
-            "derechaArriba": -1,
-            "izquierdaArriba": -1,
-            "derechaAbajo": 1,
-            "izquierdaAbajo": 1
-        };
-
-        const diagonalFactor = 0.7071; // Aproximación para los disparos diagonales
-
-        let velocidadX = dx[this.direccion] * this.velocidad;
-        let velocidadY = dy[this.direccion] * this.velocidad;
-
-        // Ajustar la velocidad para disparos diagonales
-        if (this.direccion.includes("arriba") || this.direccion.includes("abajo")) {
-            velocidadX *= diagonalFactor;
-            velocidadY *= diagonalFactor;
-        }
-
         // Actualizar la posición del arpón
-        this.sprite.x += velocidadX;
-        this.sprite.y += velocidadY;
+        this.sprite.x += this.velocidadX;
+        this.sprite.y += this.velocidadY;
 
-        // Reducir el tiempo de vida del arpón
+        // Reducir el tiempo de vida
         this.tiempoVida--;
 
+        // Eliminar el arpón si su tiempo de vida se agota
         if (this.tiempoVida <= 0) {
             this.desaparecer();
         }
     }
 
-    // Desaparecer el arpón cuando se acaba su tiempo de vida
     desaparecer() {
-        this.jugador.sprite.removeChild(this.sprite);
+        PIXI.Ticker.shared.remove(this.mover, this);
+        if (this.sprite) {
+            this.sprite.destroy();
+            this.sprite = null;
+        }
     }
 }
