@@ -85,31 +85,35 @@ class Enemigo extends Entidad {
     perseguirPez(peces) {
         if (peces.length === 0) return;
     
-        // Encontramos el pez más cercano
-        let pezMasCercano = peces[0];
-        let distanciaMinima = Math.hypot(this.x - pezMasCercano.x, this.y - pezMasCercano.y);
+        // Encontramos el pez más cercano que esté en estado 'vivo' o 'huyendo'
+        let pezMasCercano = null;
+        let distanciaMinima = Infinity;
     
-        // Recorremos todos los peces para encontrar el más cercano
         for (let pez of peces) {
-            let distancia = Math.hypot(this.x - pez.x, this.y - pez.y);
-            if (distancia < distanciaMinima) {
-                distanciaMinima = distancia;
-                pezMasCercano = pez;
+            // Solo persigue al pez si está vivo o huyendo
+            if (pez.estado === 'vivo' || pez.estado === 'huyendo') {
+                let distancia = Math.hypot(this.x - pez.x, this.y - pez.y);
+                if (distancia < distanciaMinima) {
+                    distanciaMinima = distancia;
+                    pezMasCercano = pez;
+                }
             }
         }
     
-        // Movemos el tiburón hacia el pez más cercano
-        const direccion = {
-            x: pezMasCercano.x - this.x,
-            y: pezMasCercano.y - this.y
-        };
+        // Si encontramos un pez válido para perseguir, lo seguimos
+        if (pezMasCercano) {
+            const direccion = {
+                x: pezMasCercano.x - this.x,
+                y: pezMasCercano.y - this.y
+            };
     
-        // Normalizamos la dirección para evitar que la velocidad se descontrole
-        const direccionNormalizada = this.normalize(direccion);
+            // Normalizamos la dirección para evitar que la velocidad se descontrole
+            const direccionNormalizada = this.normalize(direccion);
     
-        // Ajustamos la velocidad del tiburón para perseguir al pez
-        this.vel.x = direccionNormalizada.x * this.velocidadMax;
-        this.vel.y = direccionNormalizada.y * this.velocidadMax;
+            // Ajustamos la velocidad del tiburón para perseguir al pez
+            this.vel.x = direccionNormalizada.x * this.velocidadMax;
+            this.vel.y = direccionNormalizada.y * this.velocidadMax;
+        }
     }
 
     mantenerSeparacion(tiburones) {
