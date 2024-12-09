@@ -3,8 +3,8 @@ class Jugador {
         // Crear el contenedor para el sprite del jugador
         this.sprite = new PIXI.Container();
         this.app = app;
-        this.sprite.x = 500
-        this.sprite.y = 8500
+        this.sprite.x = 4500
+        this.sprite.y = 4500
         
 
         // Cambiar el centro del sprite para que el buzo se vea bien al girar
@@ -35,6 +35,7 @@ class Jugador {
 
         // Almacenar la última posición del mouse
         this.ultimaPosicionMouse = { x: 0, y: 0 };
+        this.arpones = []
 
         // Agregar el ticker para el movimiento
         app.ticker.add(() => this.persigueMouse());
@@ -128,7 +129,9 @@ class Jugador {
           const mouseY = this.app.renderer.plugins.interaction.mouse.global.y + this.app.stage.pivot.y - this.app.stage.y;
 
           // Crear y disparar el arpón
-          new Arpon(this.app, this.sprite.x, this.sprite.y, mouseX, mouseY);
+          const arpon1 = new Arpon(this.app, this.sprite.x, this.sprite.y, mouseX, mouseY);
+          this.arpones.push(arpon1)
+          
 
           this.activarCooldown();
     }

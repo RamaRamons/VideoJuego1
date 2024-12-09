@@ -20,7 +20,7 @@ class Juego {
         this.ponerFondo();
         this.agregarFiltroAgua();
         this.agregarEfectoAgua();
-    
+
         this.peces = [];
         this.enemigos = [];
     
@@ -30,17 +30,23 @@ class Juego {
     
         // Crear 20 peces en el centro
         for (let i = 0; i < 20; i++) {
-            const pez = new Pez(this, 500 , 8500, 1.5, 100, 1);
+            const pez = new Pez(this, 4500 , 4500, 1.5, 100, 1);
             this.peces.push(pez);
             this.grid.add(pez); // Añadir a la rejilla
         }
+        
+        
     
         // Inicializar la cámara
         this.camera = new Camera();
         this.ultimaPosicion = { x: this.app.renderer.width / 2, y: this.app.renderer.height / 2 };
 
+
         this.camaraFija = false; // Indica si la cámara debe quedarse quieta
         this.posicionFinal = { x: 0, y: 0 }; // Última posición del último pez
+
+        this.barraDeVida = new BarraVida(this, this.peces.length, this.peces);
+        console.log('Barra de vida creada:', this.barraDeVida); // Depuración
     
         // Cargar los recursos y luego iniciar el jugador
         this.cargarRecursos();
@@ -220,6 +226,7 @@ class Juego {
             this.waterOverlay.x = centro.x - this.app.renderer.width / 2;
             this.waterOverlay.y = centro.y - this.app.renderer.height / 2;
         }
+        
 
         // Mantener los efectos visuales como el filtro y overlay
         this.waterOverlay.tilePosition.x += 0.5;
@@ -246,6 +253,7 @@ class Juego {
         if (this.jugador) {
             this.jugador.apuntarHaciaMouse(this.app.renderer.plugins.interaction.mouse.global.x, this.app.renderer.plugins.interaction.mouse.global.y);
         }
+        this.barraDeVida.update()
       }
     }
 }
