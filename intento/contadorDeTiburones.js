@@ -35,6 +35,8 @@ class Contador {
 
         // Registrar la actualización en el ticker
         juego.app.ticker.add(() => this.update());
+
+        juego.app.stage.sortChildren();
     }
 
     update() {

@@ -17,6 +17,8 @@ class Tutorial {
 
         // Añadir el contenedor al stage
         juego.app.stage.addChild(this.container);
+
+        juego.app.stage.sortChildren();
     }
 
     update() {

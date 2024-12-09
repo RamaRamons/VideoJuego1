@@ -6,7 +6,7 @@ class BarraVida {
 
         // Crear el contenedor para la barra de vida
         this.container = new PIXI.Container();
-        console.log('Contenedor creado:', this.container);
+        //console.log('Contenedor creado:', this.container);
 
         // Crear la barra de fondo (gris)
         this.fondo = new PIXI.Graphics();
@@ -34,7 +34,7 @@ class BarraVida {
 
         // Añadir el contenedor al escenario
         this.juego.app.stage.addChild(this.container);
-        console.log('Contenedor agregado al stage:', this.container);
+        //console.log('Contenedor agregado al stage:', this.container);
 
         this.imagenDecorativa = new PIXI.Sprite.from('sprites/barradevida/BarraDeVida.png');  // Ruta de la imagen
         this.container.addChild(this.imagenDecorativa);
@@ -46,6 +46,8 @@ class BarraVida {
         
         this.container.x = 20; // Desplazamiento horizontal
         this.container.y = 20; // Desplazamiento vertical
+
+        juego.app.stage.sortChildren();
     }
 
     actualizarVida() {
