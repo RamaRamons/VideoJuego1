@@ -75,15 +75,15 @@
   },
   "animations": {
     "muerteTiburon": [
-      "eliminated1",
-      "eliminated2",
-      "eliminated3"
+      "eliminated1.png",
+      "eliminated2.png",
+      "eliminated3.png"
     ]
   },
   "meta": {
     "app": "http://free-tex-packer.com",
     "version": "0.6.7",
-    "image": "muerteTiburon.png",
+    "image": "sprites/tiburones/muerteTiburon.png",
     "format": "RGBA8888",
     "size": {
       "w": 742,

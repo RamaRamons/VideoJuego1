@@ -66,13 +66,10 @@ class Arpon {
     }
 
     colisionaCon(enemigo) {
-        // Lógica de colisión básica
-        const distancia = Math.hypot(
-            this.sprite.x - enemigo.sprite.x,
-            this.sprite.y - enemigo.sprite.y
-        );
+        const distancia = Math.hypot(this.sprite.x - enemigo.sprite.x, this.sprite.y - enemigo.sprite.y);
         return distancia < (this.sprite.width / 2 + enemigo.sprite.width / 2);
     }
+    
 
     colisionConEnemigo(enemigo) {
         // Eliminar el arpón

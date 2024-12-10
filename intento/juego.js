@@ -50,36 +50,6 @@ class Juego {
         // Cargar los recursos y luego iniciar el jugador
         this.cargarRecursos();
     }
-    
-    crearEnemigos() {
-        // Obtener los JSON cargados desde el loader
-        const tiburon1JSON = PIXI.Loader.shared.resources["sprites/tiburones/tiburon1.json"];
-        const tiburon2JSON = PIXI.Loader.shared.resources["sprites/tiburones/tiburon2.json"];
-        const tiburonMuerteJSON = PIXI.Loader.shared.resources["sprites/tiburones/muerteTiburon.json"]
-    
-        // Crear tiburones en posiciones aleatorias
-        const stageWidth = 9000;
-        const stageHeight = 9000;
-        const enemySize = 5;
-    
-        for (let i = 0; i < 80; i++) {
-            const posicionX = Math.random() * (stageWidth - enemySize * 2) + enemySize;
-            const posicionY = Math.random() * (stageHeight - enemySize * 2) + enemySize;
-            const tiburon = new Tiburon1(this, posicionX, posicionY, 1, tiburon1JSON, tiburonMuerteJSON);
-            this.enemigos.push(tiburon);
-            this.grid.add(tiburon); // Añadir a la rejilla
-        }
-    
-        for (let i = 0; i < 10; i++) {
-            const posicionX = Math.random() * (stageWidth - enemySize * 2) + enemySize;
-            const posicionY = Math.random() * (stageHeight - enemySize * 2) + enemySize;
-            const tiburon = new Tiburon2(this, posicionX, posicionY, 1, tiburon2JSON, tiburonMuerteJSON);
-            this.enemigos.push(tiburon);
-            this.grid.add(tiburon); // Añadir a la rejilla
-        }
-        
-        this.contadorDeTiburones = new Contador(this, this.enemigos.length, this.enemigos);
-    }
 
     agregarFiltroAgua() {
         // Asegurarse de que la textura esté correctamente cargada
@@ -162,12 +132,53 @@ class Juego {
             .add("sprites/tiburones/tiburon2.json")
             .add("sprites/tiburones/muerteTiburon.json")
             .load(() => {
-                // Iniciar el jugador una vez que los recursos están cargados
                 this.iniciarJugador();
                 this.crearEnemigos();
-                // Iniciar el bucle de actualización de PixiJS
                 this.app.ticker.add(() => this.update());
-            });   
+            });            
+    }
+
+    crearEnemigos() {
+        // Obtener los JSON cargados desde el loader
+        const tiburon1JSON = PIXI.Loader.shared.resources["sprites/tiburones/tiburon1.json"];
+        const tiburon2JSON = PIXI.Loader.shared.resources["sprites/tiburones/tiburon2.json"];
+        const muerteJSON = PIXI.Loader.shared.resources["sprites/tiburones/muerteTiburon.json"]  
+        
+        // Crear tiburones en posiciones aleatorias
+        const stageWidth = 9000;
+        const stageHeight = 9000;
+        const enemySize = 5;
+    
+        for (let i = 0; i < 80; i++) {
+            const posicionX = Math.random() * (stageWidth - enemySize * 2) + enemySize;
+            const posicionY = Math.random() * (stageHeight - enemySize * 2) + enemySize;
+            const tiburon = new Tiburon1(this, posicionX, posicionY, 1, tiburon1JSON, muerteJSON);
+            this.enemigos.push(tiburon);
+            this.grid.add(tiburon); // Añadir a la rejilla
+        }
+    
+        for (let i = 0; i < 10; i++) {
+            const posicionX = Math.random() * (stageWidth - enemySize * 2) + enemySize;
+            const posicionY = Math.random() * (stageHeight - enemySize * 2) + enemySize;
+            const tiburon = new Tiburon2(this, posicionX, posicionY, 1, tiburon2JSON, muerteJSON);
+            this.enemigos.push(tiburon);
+            this.grid.add(tiburon); // Añadir a la rejilla
+        }
+        
+        this.contadorDeTiburones = new Contador(this, this.enemigos.length, this.enemigos);
+    }
+
+    eliminarEnemigo(enemigo) {
+        // Remover el pez del array de peces
+        const index = this.enemigos.indexOf(enemigo);
+        if (index !== -1) {
+            this.enemigos.splice(index, 1);
+        }
+    
+        // Remover el contenedor del pez del stage
+        if (enemigo.container && enemigo.container.parent) {
+            enemigo.container.parent.removeChild(enemigo.container);
+        }
     }
 
     eliminarPez(pez) {

@@ -10,18 +10,18 @@ class BarraVida {
 
         // Crear la barra de fondo (gris)
         this.fondo = new PIXI.Graphics();
-        this.fondo.beginFill(0x777777); // Gris oscuro
+        this.fondo.beginFill(0x777777); // Gris
         this.fondo.drawRect(0, 0, 250, 35); // Ancho y alto de la barra
         this.fondo.endFill();
 
         // Crear la barra de vida (verde)
         this.vida = new PIXI.Graphics();
-        this.vida.beginFill(0x00ff00); // Verde
+        this.vida.beginFill(0x00CC66); // Verde
         this.vida.drawRect(0, 0, 100, 20); // Ancho y alto de la barra
         this.vida.endFill();
 
         // Crear el texto de la vida
-        this.textoVida = new PIXI.Text('', { fontSize: 18, fill: 0x004444, align: 'center', fontWeight: 'bold' });
+        this.textoVida = new PIXI.Text('', { fontSize: 18, fill: 0x003333, align: 'center', fontWeight: 'bold' });
         this.textoVida.x = 300; // Posicionar el texto en el centro de la barra de vida
         this.textoVida.y = 7;   // Ajustar la posición vertical para que quede centrado en la barra
 
@@ -60,7 +60,7 @@ class BarraVida {
         const vidaPorcentaje = vidaActual / this.maximo; // Relación entre lo que hay y el máximo
 
         this.vida.clear();
-        this.vida.beginFill(0x00ff00); // Verde
+        this.vida.beginFill(0x00CC66); // Verde
         this.vida.drawRect(0, 0, 250 * vidaPorcentaje, 35); // Tamaño proporcional a la vida actual
         this.vida.endFill();
 

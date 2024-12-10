@@ -1,5 +1,5 @@
 class Enemigo extends Entidad {
-    constructor(juego, x, y, velocidadMax, animacionJSON) {
+    constructor(juego, x, y, velocidadMax, animacionJSON, animacionMuerteJSON) {
         super(juego, x, y, velocidadMax);
         this.juego = juego;
         this.grid = juego.grid;
@@ -21,6 +21,7 @@ class Enemigo extends Entidad {
         this.ultimoCambio = Date.now();  // Momento en que se cambió la dirección por última vez
         this.nuevaDireccion = { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 }; // Nueva dirección aleatoria
         this.suavizado = 0.05;
+        this.muerte = animacionMuerteJSON
     }
 
     cargarAnimacion(animacionJSON) {
@@ -57,7 +58,7 @@ class Enemigo extends Entidad {
         // Cambiar la animación del sprite para mostrar el estado de muerte
         if (this.sprite) {
             this.sprite.stop(); // Detener cualquier animación en curso
-            const texturaMuerte = PIXI.Texture.from('ruta_a_la_textura_muerte'); // Cambiar por la ruta de la textura
+            const texturaMuerte = PIXI.Texture.from('sprites/tiburones/eliminated3.png'); // Cambiar por la ruta de la textura
             this.sprite.texture = texturaMuerte;
             this.sprite.scale.set(this.size); // Asegurar el tamaño consistente
         }
