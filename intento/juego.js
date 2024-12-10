@@ -35,8 +35,6 @@ class Juego {
             this.grid.add(pez); // Añadir a la rejilla
         }
         
-        
-    
         // Inicializar la cámara
         this.camera = new Camera();
         this.ultimaPosicion = { x: this.app.renderer.width / 2, y: this.app.renderer.height / 2 };
@@ -47,6 +45,7 @@ class Juego {
 
         this.barraDeVida = new BarraVida(this, this.peces.length, this.peces);
         this.tutorial = new Tutorial(this)
+        this.tiempo = new Tiempo(this)
     
         // Cargar los recursos y luego iniciar el jugador
         this.cargarRecursos();
@@ -62,7 +61,7 @@ class Juego {
         const stageHeight = 9000;
         const enemySize = 5;
     
-        for (let i = 0; i < 150; i++) {
+        for (let i = 0; i < 10; i++) {
             const posicionX = Math.random() * (stageWidth - enemySize * 2) + enemySize;
             const posicionY = Math.random() * (stageHeight - enemySize * 2) + enemySize;
             const tiburon = new Tiburon1(this, posicionX, posicionY, 1, tiburon1JSON);
@@ -70,7 +69,7 @@ class Juego {
             this.grid.add(tiburon); // Añadir a la rejilla
         }
     
-        for (let i = 0; i < 150; i++) {
+        for (let i = 0; i < 10; i++) {
             const posicionX = Math.random() * (stageWidth - enemySize * 2) + enemySize;
             const posicionY = Math.random() * (stageHeight - enemySize * 2) + enemySize;
             const tiburon = new Tiburon2(this, posicionX, posicionY, 1, tiburon2JSON);
@@ -257,6 +256,7 @@ class Juego {
         this.barraDeVida.update()
         this.contadorDeTiburones.update()
         this.tutorial.update()
+        this.tiempo.update()
       }
     }
 }

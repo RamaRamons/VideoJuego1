@@ -1,0 +1,94 @@
+{
+  "frames": {
+    "eliminated1.png": {
+      "frame": {
+        "x": 1,
+        "y": 1,
+        "w": 740,
+        "h": 536
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 51,
+        "w": 740,
+        "h": 536
+      },
+      "sourceSize": {
+        "w": 740,
+        "h": 640
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "eliminated2.png": {
+      "frame": {
+        "x": 1,
+        "y": 539,
+        "w": 740,
+        "h": 536
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 51,
+        "w": 740,
+        "h": 536
+      },
+      "sourceSize": {
+        "w": 740,
+        "h": 640
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "eliminated3.png": {
+      "frame": {
+        "x": 1,
+        "y": 1077,
+        "w": 740,
+        "h": 536
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 51,
+        "w": 740,
+        "h": 536
+      },
+      "sourceSize": {
+        "w": 740,
+        "h": 640
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "animations": {
+    "morir": [
+      "eliminated1",
+      "eliminated2",
+      "eliminated3"
+    ]
+  },
+  "meta": {
+    "app": "http://free-tex-packer.com",
+    "version": "0.6.7",
+    "image": "muerteTiburon.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 742,
+      "h": 1614
+    },
+    "scale": 1
+  }
+}

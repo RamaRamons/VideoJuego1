@@ -9,20 +9,20 @@ class Contador {
         // Crear fondo del contador
         const texturaFondo = PIXI.Texture.from('sprites/hud/ContadorDeTiburones.png');
         this.fondo = new PIXI.Sprite(texturaFondo);
-        this.fondo.width = 250; 
-        this.fondo.height = 125;
+        this.fondo.width = 150; 
+        this.fondo.height = 75;
 
         // Crear texto del contador
         this.texto = new PIXI.Text(`${this.listaObjetos.length} / ${this.maximo}`, {
             fontFamily: 'Arial',
-            fontSize: 24,
-            fill: 'white',
+            fontSize: 18,
+            fill: 'yellow',
             align: 'center'
         });
 
         this.texto.anchor.set(0.5, 0.5);
-        this.texto.x = this.fondo.width / 2 + 40;
-        this.texto.y = this.fondo.height / 2 - 7.5;
+        this.texto.x = this.fondo.width / 2 + 24;
+        this.texto.y = this.fondo.height / 1.5 - 16;
 
         // Agregar fondo y texto al contenedor
         this.container.addChild(this.fondo);

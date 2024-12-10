@@ -135,6 +135,7 @@ class Jugador {
 
           this.activarCooldown();
     }
+    
     activarCooldown() {
         this.cooldownArpon = true;
         setTimeout(() => {

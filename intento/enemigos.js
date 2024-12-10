@@ -146,6 +146,7 @@ class Enemigo extends Entidad {
         this.vel.x = velocidadNormalizada.x * this.velocidadMax;
         this.vel.y = velocidadNormalizada.y * this.velocidadMax;
     }
+
     normalize(vector) {
         const magnitude = Math.hypot(vector.x, vector.y);  // Calcula la magnitud del vector
         return magnitude > 0 ? { x: vector.x / magnitude, y: vector.y / magnitude } : { x: 0, y: 0 };
@@ -208,8 +209,6 @@ class Enemigo extends Entidad {
             this.vel.y *= -1;
         }
     }
-    
-
 }
 
 class Tiburon1 extends Enemigo {
