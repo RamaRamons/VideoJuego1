@@ -1,9 +1,10 @@
 class Arpon {
-    constructor(app, startX, startY, targetX, targetY, grid) {
+    constructor(app, startX, startY, targetX, targetY, grid, puntaje) {
         this.app = app;
         this.velocidad = 10; // Velocidad del arpón
         this.tiempoVida = 300; // Tiempo de vida en ticks (~5 segundos)
         this.grid = grid; // Referencia a la grilla espacial
+        this.puntaje = puntaje
 
         // Crear el sprite del arpón
         this.sprite = new PIXI.Sprite(PIXI.Texture.from("sprites/arpon/derecha.png"));
@@ -78,6 +79,7 @@ class Arpon {
         // Llamar al método morir del enemigo
         if (enemigo && typeof enemigo.morir === "function") {
             enemigo.morir();
+            this.puntaje.incrementarContador();
         }
     }
 

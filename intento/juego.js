@@ -45,6 +45,7 @@ class Juego {
 
         this.barraDeVida = new BarraVida(this, this.peces.length, this.peces);
         this.tutorial = new Tutorial(this)
+        this.contadorDeTiburones = new Contador(this);
         this.tiempo = new Tiempo(this)
     
         // Cargar los recursos y luego iniciar el jugador
@@ -164,8 +165,6 @@ class Juego {
             this.enemigos.push(tiburon);
             this.grid.add(tiburon); // Añadir a la rejilla
         }
-        
-        this.contadorDeTiburones = new Contador(this, this.enemigos.length, this.enemigos);
     }
 
     eliminarEnemigo(enemigo) {
@@ -196,7 +195,7 @@ class Juego {
 
     iniciarJugador() {
         // Crear el jugador y pasar la instancia de app al constructor
-        this.jugador = new Jugador(this.app, this.grid); // Pasar 'this.app' al constructor de Jugador
+        this.jugador = new Jugador(this.app, this.grid, this.contadorDeTiburones); // Pasar 'this.app' al constructor de Jugador
         this.app.stage.addChild(this.jugador.sprite);
     }
 

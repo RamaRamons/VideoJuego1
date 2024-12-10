@@ -24,6 +24,6 @@ class Tutorial {
     update() {
         const centro = this.juego.calcularCentro();
         this.container.x = centro.x - (this.juego.app.renderer.width / 2) + 20;
-        this.container.y = centro.y + (this.juego.app.renderer.height / 1.5) - 220;
+        this.container.y = centro.y + (this.juego.app.renderer.height / 2) - 220;
     }
 }

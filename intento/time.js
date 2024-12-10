@@ -35,36 +35,36 @@ class Tiempo {
         // Añadir el contenedor al stage
         this.juego.app.stage.addChild(this.container);
 
+        // Iniciar el contador inicialmente
         this.iniciarContador();
     }
 
     iniciarContador() {
-        // Limpiar cualquier intervalo previo
-        if (this.intervalo) {
-            clearInterval(this.intervalo);
-        }
-
         this.intervalo = setInterval(() => {
-            this.tiempoRestante--;
-
-            // Actualizar el texto del contador
-            const minutos = Math.floor(this.tiempoRestante / 60).toString().padStart(2, '0');
-            const segundos = (this.tiempoRestante % 60).toString().padStart(2, '0');
-            this.texto.text = `${minutos}:${segundos}`;
-
-            // Cambiar el color a rojo cuando llegue a "00:00"
+            // Si el tiempo es 0, cambiar color y esperar 2 segundos
             if (this.tiempoRestante === 0) {
+                this.juego.contadorDeTiburones.finalizarRonda()
                 this.texto.style.fill = 'red';
 
                 // Detener el contador temporalmente
                 clearInterval(this.intervalo);
 
+                // Pausa de 2 segundos
                 setTimeout(() => {
-                    // Reiniciar el contador después de detenerse
-                    this.texto.style.fill = 'white';
+                    // Después de 2 segundos, reiniciar el contador
                     this.tiempoRestante = 30;
-                    this.iniciarContador();
-                }, 2000); // Pausa en "00:00" durante 3 segundos
+                    this.texto.style.fill = 'white';
+                    this.iniciarContador(); // Reiniciar el contador
+                }, 2000);
+            } else {
+                this.juego.contadorDeTiburones.modificarRonda(true)
+                // Actualizar el tiempo
+                this.tiempoRestante--;
+
+                // Actualizar el texto del contador
+                const minutos = Math.floor(this.tiempoRestante / 60).toString().padStart(2, '0');
+                const segundos = (this.tiempoRestante % 60).toString().padStart(2, '0');
+                this.texto.text = `${minutos}:${segundos}`;
             }
         }, 1000); // Actualizar cada segundo
     }
