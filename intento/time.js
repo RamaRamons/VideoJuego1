@@ -64,7 +64,7 @@ class Tiempo {
                     this.texto.style.fill = 'white';
                     this.tiempoRestante = 30;
                     this.iniciarContador();
-                }, 3000); // Pausa en "00:00" durante 3 segundos
+                }, 2000); // Pausa en "00:00" durante 3 segundos
             }
         }, 1000); // Actualizar cada segundo
     }

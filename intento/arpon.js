@@ -1,8 +1,9 @@
 class Arpon {
-    constructor(app, startX, startY, targetX, targetY) {
+    constructor(app, startX, startY, targetX, targetY, grid) {
         this.app = app;
         this.velocidad = 10; // Velocidad del arpón
         this.tiempoVida = 300; // Tiempo de vida en ticks (~5 segundos)
+        this.grid = grid; // Referencia a la grilla espacial
 
         // Crear el sprite del arpón
         this.sprite = new PIXI.Sprite(PIXI.Texture.from("sprites/arpon/derecha.png"));
@@ -33,12 +34,53 @@ class Arpon {
         this.sprite.x += this.velocidadX;
         this.sprite.y += this.velocidadY;
 
+        // Detectar colisiones con enemigos en la grilla
+        this.detectarColisiones();
+
         // Reducir el tiempo de vida
         this.tiempoVida--;
 
         // Eliminar el arpón si su tiempo de vida se agota
         if (this.tiempoVida <= 0) {
             this.desaparecer();
+        }
+    }
+
+    detectarColisiones() {
+        // Obtener la celda actual del arpón
+        const celdaActual = this.grid.getCell(this.sprite.x, this.sprite.y);
+        if (!celdaActual) return;
+
+        // Obtener los objetos de las celdas vecinas
+        const celdasVecinas = this.grid.obtenerCeldasVecinas.call(celdaActual);
+
+        for (const celda of [celdaActual, ...celdasVecinas]) {
+            for (const objeto of celda.objetos) {
+                // Si el objeto es un enemigo y colisiona con el arpón
+                if (this.colisionaCon(objeto)) {
+                    this.colisionConEnemigo(objeto);
+                    return; // Salir después de la primera colisión
+                }
+            }
+        }
+    }
+
+    colisionaCon(enemigo) {
+        // Lógica de colisión básica
+        const distancia = Math.hypot(
+            this.sprite.x - enemigo.sprite.x,
+            this.sprite.y - enemigo.sprite.y
+        );
+        return distancia < (this.sprite.width / 2 + enemigo.sprite.width / 2);
+    }
+
+    colisionConEnemigo(enemigo) {
+        // Eliminar el arpón
+        this.desaparecer();
+
+        // Llamar al método morir del enemigo
+        if (enemigo && typeof enemigo.morir === "function") {
+            enemigo.morir();
         }
     }
 

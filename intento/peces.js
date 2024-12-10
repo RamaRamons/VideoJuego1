@@ -41,6 +41,7 @@ class Pez extends Entidad {
         this.container.scale.set(0.05); // Ajusta el tamaño si es necesario
         this.juego.app.stage.addChild(this.container);
     }
+    
     cambiarSprite(direccion, estado) {
         if (estado === 'vivo') {
             this.sprite.texture = this.texturasMovimiento[direccion];

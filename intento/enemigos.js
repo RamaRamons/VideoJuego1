@@ -14,17 +14,16 @@ class Enemigo extends Entidad {
         this.size = 0.5;
         this.separacionMinima = 100;
         this.sprite = null;
+        this.estado = 'vivo'; // Estado inicial
         this.cargarAnimacion(animacionJSON);
 
         this.tiempoCambio = 3000;  // Tiempo en milisegundos para cambiar de dirección (1 segundo)
         this.ultimoCambio = Date.now();  // Momento en que se cambió la dirección por última vez
         this.nuevaDireccion = { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 }; // Nueva dirección aleatoria
         this.suavizado = 0.05;
-
     }
 
     cargarAnimacion(animacionJSON) {
-            
         try {
             const texturaBase = PIXI.Texture.from(animacionJSON.data.meta.image);
             const texturas = [];
@@ -50,18 +49,40 @@ class Enemigo extends Entidad {
         }
     }  
 
-    update() {
-        super.update(this);
+    morir() {
+        if (this.estado !== 'vivo') return; // Evitar que muera más de una vez
 
+        this.estado = 'muriendo';
+
+        // Cambiar la animación del sprite para mostrar el estado de muerte
+        if (this.sprite) {
+            this.sprite.stop(); // Detener cualquier animación en curso
+            const texturaMuerte = PIXI.Texture.from('ruta_a_la_textura_muerte'); // Cambiar por la ruta de la textura
+            this.sprite.texture = texturaMuerte;
+            this.sprite.scale.set(this.size); // Asegurar el tamaño consistente
+        }
+
+        // Tiempo para eliminar al enemigo después de morir
+        setTimeout(() => {
+            this.estado = 'muerto';
+            this.eliminar(); // Eliminar del escenario
+        }, 1000); // Ajustar la duración de la animación de muerte
+    }
+
+    eliminar() {
+        if (this.sprite) {
+            this.juego.app.stage.removeChild(this.sprite);
+        }
+        this.juego.eliminarEnemigo(this); // Asumimos que hay un método para eliminar del juego
+    }
+
+    update() {
+        if (this.estado !== 'vivo') return; // No actualizar si no está vivo
+
+        super.update(this);
         
         this.cambioDeRumbo(); // Llamamos al cambio de rumbo para que el tiburón cambie dirección periódicamente
         this.movimientoAleatorio(); // Aplicamos el movimiento aleatorio con suavizado
-
-        //this.container.x = this.juego.app.renderer.plugins.interaction.mouse.global.x + this.juego.app.stage.pivot.x - this.juego.app.stage.x;
-        //this.container.y = this.juego.app.renderer.plugins.interaction.mouse.global.y + this.juego.app.stage.pivot.y - this.juego.app.stage.y;
-        //this.x = this.juego.app.renderer.plugins.interaction.mouse.global.x + this.juego.app.stage.pivot.x - this.juego.app.stage.x;
-        //this.y = this.juego.app.renderer.plugins.interaction.mouse.global.y + this.juego.app.stage.pivot.y - this.juego.app.stage.y;
-
 
         const pecesCercanos = this.obtenerVecinos(Pez, this.radioVisionCeldas); // Busca solo objetos del tipo `Pez`
         const tiburonesCercanos = this.obtenerVecinos(Enemigo, this.radioVisionCeldas);

@@ -1,11 +1,11 @@
 class Jugador {
-    constructor(app) {
+    constructor(app, grilla) {
         // Crear el contenedor para el sprite del jugador
         this.sprite = new PIXI.Container();
         this.app = app;
         this.sprite.x = 4500
         this.sprite.y = 4500
-        
+        this.grilla = grilla
 
         // Cambiar el centro del sprite para que el buzo se vea bien al girar
         this.sprite.pivot.set(16, 16); // Ajustar según el centro del sprite, si es necesario
@@ -41,7 +41,7 @@ class Jugador {
         app.ticker.add(() => this.persigueMouse());
 
         // Evento para lanzar el arpón
-        window.addEventListener('click', () => this.lanzarArpon());
+        window.addEventListener('click', () => this.lanzarArpon(this.grilla));
     }
 
     cargarAnimacion(json) {
@@ -121,19 +121,18 @@ class Jugador {
         this.apuntarHaciaMouse(mouseX, mouseY);
     }
 
-    lanzarArpon() {
+    lanzarArpon(espacio) {
 
         if (this.cooldownArpon) return;
         // Obtener las coordenadas del mouse en el espacio del juego
-          const mouseX = this.app.renderer.plugins.interaction.mouse.global.x + this.app.stage.pivot.x - this.app.stage.x;
-          const mouseY = this.app.renderer.plugins.interaction.mouse.global.y + this.app.stage.pivot.y - this.app.stage.y;
+        const mouseX = this.app.renderer.plugins.interaction.mouse.global.x + this.app.stage.pivot.x - this.app.stage.x;
+        const mouseY = this.app.renderer.plugins.interaction.mouse.global.y + this.app.stage.pivot.y - this.app.stage.y;
 
-          // Crear y disparar el arpón
-          const arpon1 = new Arpon(this.app, this.sprite.x, this.sprite.y, mouseX, mouseY);
-          this.arpones.push(arpon1)
-          
-
-          this.activarCooldown();
+        // Crear y disparar el arpón
+        const arpon1 = new Arpon(this.app, this.sprite.x, this.sprite.y, mouseX, mouseY, espacio);
+        this.arpones.push(arpon1)
+        
+        this.activarCooldown();
     }
     
     activarCooldown() {

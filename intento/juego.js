@@ -55,16 +55,17 @@ class Juego {
         // Obtener los JSON cargados desde el loader
         const tiburon1JSON = PIXI.Loader.shared.resources["sprites/tiburones/tiburon1.json"];
         const tiburon2JSON = PIXI.Loader.shared.resources["sprites/tiburones/tiburon2.json"];
+        const tiburonMuerteJSON = PIXI.Loader.shared.resources["sprites/tiburones/muerteTiburon.json"]
     
         // Crear tiburones en posiciones aleatorias
         const stageWidth = 9000;
         const stageHeight = 9000;
         const enemySize = 5;
     
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 80; i++) {
             const posicionX = Math.random() * (stageWidth - enemySize * 2) + enemySize;
             const posicionY = Math.random() * (stageHeight - enemySize * 2) + enemySize;
-            const tiburon = new Tiburon1(this, posicionX, posicionY, 1, tiburon1JSON);
+            const tiburon = new Tiburon1(this, posicionX, posicionY, 1, tiburon1JSON, tiburonMuerteJSON);
             this.enemigos.push(tiburon);
             this.grid.add(tiburon); // Añadir a la rejilla
         }
@@ -72,10 +73,11 @@ class Juego {
         for (let i = 0; i < 10; i++) {
             const posicionX = Math.random() * (stageWidth - enemySize * 2) + enemySize;
             const posicionY = Math.random() * (stageHeight - enemySize * 2) + enemySize;
-            const tiburon = new Tiburon2(this, posicionX, posicionY, 1, tiburon2JSON);
+            const tiburon = new Tiburon2(this, posicionX, posicionY, 1, tiburon2JSON, tiburonMuerteJSON);
             this.enemigos.push(tiburon);
             this.grid.add(tiburon); // Añadir a la rejilla
         }
+        
         this.contadorDeTiburones = new Contador(this, this.enemigos.length, this.enemigos);
     }
 
@@ -158,6 +160,7 @@ class Juego {
             .add("sprites/buzo/animacionabajo/izquierda/BuzoIzquierdaAbajo.json")
             .add("sprites/tiburones/tiburon1.json")
             .add("sprites/tiburones/tiburon2.json")
+            .add("sprites/tiburones/muerteTiburon.json")
             .load(() => {
                 // Iniciar el jugador una vez que los recursos están cargados
                 this.iniciarJugador();
@@ -182,7 +185,7 @@ class Juego {
 
     iniciarJugador() {
         // Crear el jugador y pasar la instancia de app al constructor
-        this.jugador = new Jugador(this.app); // Pasar 'this.app' al constructor de Jugador
+        this.jugador = new Jugador(this.app, this.grid); // Pasar 'this.app' al constructor de Jugador
         this.app.stage.addChild(this.jugador.sprite);
     }
 
